@@ -14,7 +14,7 @@ class SRTKabuki:
     def __init__(self):
         self.libsrt = self.load_so()
         self.startup()
-        self.sock = self.mk_sock()
+        self.sock = self.create_socket()
 
     def load_so(self):
         """

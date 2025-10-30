@@ -193,8 +193,6 @@ class SRTKabuki:
         self.libsrt.srt_setsockflag.restype = ctypes.c_int
         if self.sock:
             self.libsrt.srt_setsockflag(self.sock, flag, 1, 32)
-        else:
-            print("if you want to add a flag, make a socket first")
         self.last_error()
 
     def bind(self):

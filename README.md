@@ -5,6 +5,9 @@ I started to convert libsrt to python, then I started reading the ctypes module 
 and decided it made more sense to call libsrt C function directly from python. <BR>
 </sampl>
 
+### NEWS
+* 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT , but I figured it out today.Super jazzed
+
 ### My goal here is to be able to use the SRT protocol in python 
 and to do so with just a few lines of code.
 <BR> 
@@ -20,7 +23,8 @@ If you are interested in using SRT from python, come work on it with me..<BR>
 You don't need to be a master of python, there's stuff to do besides just writing code.<BR>
 If you're interested in or know SRT, come on and give me a hand so we can do it much faster.
 
-### There is an srt client example included with libsrt.
+
+### Here's an srt client example included with libsrt.
 
 <details><summary> the original srt client example included with libsrt </summary>
  

@@ -1,9 +1,17 @@
 """
 
 static.py
-lots srt constantsb ( I unrolled the enums)
+srt constants ( I unrolled the enums)
 
 """
+
+import socket
+
+SRT_ERROR = -1
+AF_INET = socket.AF_INET
+SOCK_DGRAM = socket.SOCK_DGRAM
+AI_PASSIVE = socket.AI_PASSIVE
+
 
 SRT_LIVE_DEF_PLSIZE = 1316
 SRT_LIVE_MAX_PLSIZE = 1456

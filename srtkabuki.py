@@ -13,11 +13,13 @@ SRTO_RCVSYN = 29
 
 # Socket Address structures
 
+
 class sockaddr(ctypes.Structure):
     _fields_ = [
         ("sa_family", ctypes.c_ushort),
         ("sa_data", ctypes.c_char * 14),  # 14 bytes for address data
     ]
+
 
 class in_addr(ctypes.Structure):
     _fields_ = [("s_addr", ctypes.c_uint32)]  # IPv4
@@ -32,18 +34,19 @@ class sockaddr_in(ctypes.Structure):
     ]
 
 
-class sockaddr_in6(ctypes.Structure): # For IPv6
+class sockaddr_in6(ctypes.Structure):  # For IPv6
     _fields_ = [
         ("sin6_family", ctypes.c_ushort),
         ("sin6_port", ctypes.c_ushort),
         ("sin6_flowinfo", ctypes.c_uint),
         ("sin6_addr", ctypes.c_ubyte * 16),
-        ("sin6_scope_id", ctypes.c_uint)
+        ("sin6_scope_id", ctypes.c_uint),
     ]
 
 
 class addrinfo(ctypes.Structure):
-    pass # Forward declaration for self-referential pointer
+    pass  # Forward declaration for self-referential pointer
+
 
 addrinfo._fields_ = [
     ("ai_flags", ctypes.c_int),
@@ -53,67 +56,54 @@ addrinfo._fields_ = [
     ("ai_addrlen", ctypes.c_size_t),
     ("ai_addr", ctypes.POINTER(sockaddr)),
     ("ai_canonname", ctypes.c_char_p),
-    ("ai_next", ctypes.POINTER(addrinfo))
+    ("ai_next", ctypes.POINTER(addrinfo)),
 ]
 
 
 class sockaddr_storage(ctypes.Structure):
     _fields_ = [
         ("ss_family", ctypes.c_ushort),
-        ("ss_data", ctypes.c_ubyte * (128 - ctypes.sizeof(ctypes.c_ushort))), # Example size, adjust as needed
+        (
+            "ss_data",
+            ctypes.c_ubyte * (128 - ctypes.sizeof(ctypes.c_ushort)),
+        ),  # Example size, adjust as needed
     ]
-
-
-def get_addr_info_ctypes(host, port, hints=None):
-    node = host.encode('utf-8') if host else None
-    service = str(port).encode('utf-8') if port else None
-    hints_ptr = None
-    if hints:
-        # Create a hints addrinfo structure
-        c_hints = addrinfo()
-        c_hints.ai_family = hints.get("ai_family", 0)
-        c_hints.ai_socktype = hints.get("ai_socktype", 0)
-        c_hints.ai_protocol = hints.get("ai_protocol", 0)
-        c_hints.ai_flags = hints.get("ai_flags", 0)
-        hints_ptr = ctypes.pointer(c_hints)
-    res_ptr = ctypes.POINTER(addrinfo)()
-    err = libc.getaddrinfo(node, service, hints_ptr, ctypes.byref(res_ptr))
-    if err != 0:
-        # Handle error (e.g., raise an exception)
-        raise OSError(f"getaddrinfo failed with error: {err}")
-    results = []
-    current = res_ptr.contents
-    while True:
-        # Process the current addrinfo structure
-        # Extract family, socktype, protocol, address, etc.
-        # Example:
-        # if current.ai_family == AF_INET:
-        #     sockaddr_data = ctypes.cast(current.ai_addr, ctypes.POINTER(sockaddr_in)).contents
-        #     ip_address = ".".join(map(str, sockaddr_data.sin_addr))
-        #     port_number = socket.ntohs(sockaddr_data.sin_port)
-        #     results.append({"family": current.ai_family, "address": ip_address, "port": port_number})
-        if not current.ai_next:
-            break
-        current = current.ai_next.contents
-    libc.freeaddrinfo(res_ptr) # Free the allocated memory
-    return results
-
 
 
 class SRTKabuki:
 
     def __init__(self):
-        self.addr='0.0.0.0'
-        self.port=9000
-        self.libsrt = self.load_so()
+        self.addr = "0.0.0.0"
+        self.port = 9000
+        self.getaddrinfo, self.freeaddrinfo = self.load_libc()
+        self.libsrt = self.load_srt()
         self.startup()
         self.sock = self.mk_sock()
         self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr()
 
-
-    def load_so(self):
+    @staticmethod
+    def load_libc(self):
         """
-        load_so load libsrt.so
+        load_libc load getaddrinfo and freeaddrinfo from libc.so
+        """
+        libc = ctypes.CDLL(ctypes.util.find_library("c"))
+        getaddrinfo = libc.getaddrinfo
+        getaddrinfo.argtypes = [
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.POINTER(addrinfo),
+            ctypes.POINTER(ctypes.POINTER(addrinfo)),
+        ]
+        getaddrinfo.restype = ctypes.c_int
+        freeaddrinfo = libc.freeaddrinfo
+        freeaddrinfo.argtypes = [ctypes.POINTER(addrinfo)]
+        freeaddrinfo.restype = None
+        return getaddrinfo, freeaddrinfo
+
+    @staticmethod
+    def load_srt(self):
+        """
+        load_srt load everything from libsrt.so
         """
         libsrt = None
         libsrt = ctypes.CDLL("libsrt.so")
@@ -122,7 +112,7 @@ class SRTKabuki:
             sys.exit(1)
         return libsrt
 
-    def ipv4int(self,addr):
+    def ipv4int(self, addr):
         """
         take a ipv4 string addr and make it an int
         """
@@ -178,7 +168,7 @@ class SRTKabuki:
         self.last_error()
         return ss
 
-    def set_sock_flag(self, flag,val):
+    def set_sock_flag(self, flag, val):
         """
         set_sock_flag  set_sock_flag
         the flag is one from statiic.SRT_SOCKOPTS
@@ -193,6 +183,8 @@ class SRTKabuki:
         self.libsrt.srt_setsockflag.restype = ctypes.c_int
         if self.sock:
             self.libsrt.srt_setsockflag(self.sock, flag, 1, 32)
+        else:
+            print("if you want to add a flag, make a socket first")
         self.last_error()
 
     def bind(self):
@@ -217,7 +209,7 @@ class SRTKabuki:
         """
         connect  is srt_connect()
         """
-        self.libsrt.srt_connect(self.sock, self.sa_ptr,self.sa_size )
+        self.libsrt.srt_connect(self.sock, self.sa_ptr, self.sa_size)
         self.last_error()
 
     def accept(self):
@@ -238,23 +230,30 @@ class SRTKabuki:
         self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         self.libsrt.srt_recvmsg.restype = ctypes.c_int
 
-    def  byte_mesg(self,mesg):
+    def byte_mesg(self, mesg):
         """
         byte_mesg convert python byte string
         to a C string buffer
         """
-        if not isinstance(mesg,bytes):
-            mesg =b"Message needs to be bytes"
-        return ctypes.create_string_buffer(mesg,len(mesg))
-    
-    def send_mesg(self,mesg):
+        if not isinstance(mesg, bytes):
+            mesg = b"Message needs to be bytes"
+        return ctypes.create_string_buffer(mesg, len(mesg))
+
+    def send_mesg(self, mesg):
         """
         send_mesg format byte string for C
         and write it to the socket
         """
         mesg = self.byte_mesg(mesg)
         st = self.libsrt.srt_sendmsg2(self.sock, mesg, ctypes.sizeof(mesg), None)
+        self.last_error()
 
+    def send(self, mesg):
+        """
+        send srt_send
+        """
+        libsrt.srt_send(self.sock, mesg, ctypes.sizeof(mesg))
+        self.last_error()
 
     def close(self):
         """

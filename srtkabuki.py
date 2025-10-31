@@ -20,8 +20,6 @@ from static import (
     SRT_ERROR,
 )
 
-# SRTO_RCVSYN = 29
-
 # Socket Address structures
 
 
@@ -298,6 +296,18 @@ class SRTKabuki:
         self.last_error()
         return file_size
 
+    def recv_file(self,local_file):
+        remote_size = self.remote_file_size()
+        offset_val = ctypes.c_int64(0)
+        recvsize = self.libsrt.srt_recvfile(
+            self.sock,
+            local_file.encode("utf-8"),
+            ctypes.byref(offset_val),
+            remote_size,
+            SRT_DEFAULT_RECVFILE_BLOCK,
+        )
+        self.last_error()
+
     def fetch(self, host, port, remote_file, local_file):
         yes = ctypes.c_int(1)
         self.set_sock_flag(SRTO_TRANSTYPE,yes)
@@ -319,13 +329,5 @@ class SRTKabuki:
         )
         self.freeaddrinfo(peer)
         self.request_file(remote_file)
-        remote_size = self.remote_file_size()
-        offset_val = ctypes.c_int64(0)
-        recvsize = self.libsrt.srt_recvfile(
-            self.sock,
-            local_file.encode("utf-8"),
-            ctypes.byref(offset_val),
-            remote_size,
-            SRT_DEFAULT_RECVFILE_BLOCK,
-        )
+        self.recv_file(local_file)
         self.last_error()

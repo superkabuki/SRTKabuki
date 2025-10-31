@@ -5,16 +5,16 @@ I started to convert libsrt to python, then I started reading the ctypes module 
 and decided it made more sense to call libsrt C function directly from python. <BR>
 </sampl>
 
-# Download a file over SRT with SRTKabuki
+# Download a file over SRT with SRTKabuki in three lines of code
 
 ```py3
 Python 3.11.2 (main, Apr 28 2025, 14:11:48) [GCC 12.2.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
->>> from srtkabuki import SRTKabuki
->>> srtk=SRTKabuki()
+>>> from srtkabuki import SRTKabuki    # 1
+>>> srtk=SRTKabuki()                   # 2
 startup: Success
 create_socket: Success
->>> srtk.fetch('10.7.1.3','9000','a_b_c.ts','gonzo.ts')   # host, port, remotefile, localfile
+>>> srtk.fetch('10.7.1.3','9000','a_b_c.ts','gonzo.ts')   # 3      host, port, remotefile, localfile
 set_sock_flag: Success
 request_file: Success
 remote_file_size: Success

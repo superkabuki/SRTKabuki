@@ -6,7 +6,7 @@ and decided it made more sense to call libsrt C function directly from python. <
 </sampl>
 
 ### NEWS
-* 10/30/2025 :  __downloading files over a network is now working__,cleaning up code for a new commit. 
+* 10/30/2025 :  __Today I got basic downloading files over a network using SRT working__,cleaning up code for a new commit. 
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed
 
 ### My goal here is to be able to use the SRT protocol in python 

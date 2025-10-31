@@ -9,6 +9,7 @@ import sys
 import os
 import socket
 import struct
+import inspect
 
 
 from static import (
@@ -87,10 +88,9 @@ class SRTKabuki:
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
-        self.sock = self.mk_sock()
+        self.sock = self.create_socket()
         self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr()
 
-    @staticmethod
     def load_libc(self):
         """
         load_libc load getaddrinfo and freeaddrinfo from libc.so
@@ -109,7 +109,6 @@ class SRTKabuki:
         freeaddrinfo.restype = None
         return getaddrinfo, freeaddrinfo
 
-    @staticmethod
     def load_srt(self):
         """
         load_srt load everything from libsrt.so
@@ -172,7 +171,7 @@ class SRTKabuki:
         """
         self.libsrt.srt_create_socket.argtypes = []
         self.libsrt.srt_create_socket.restype = ctypes.c_int
-        ss = libsrt.srt_create_socket()
+        ss = self.libsrt.srt_create_socket()
         self.last_error()
         return ss
 

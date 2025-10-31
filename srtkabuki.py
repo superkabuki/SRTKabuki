@@ -148,11 +148,11 @@ class SRTKabuki:
         self.libsrt.srt_startup.argtypes = []
         self.libsrt.srt_startup.restype = None
         self.libsrt.srt_startup()
-        self.last_error()
+        self.getlasterror()
 
-    def last_error(self):
+    def getlasterror(self):
         """
-        last_error srt_getlasterror_str
+        getlasterror srt_getlasterror_str
 
         **** I realize it will set argtypes and restype repeatedly
         and I say it doesn't matter.
@@ -172,12 +172,12 @@ class SRTKabuki:
         self.libsrt.srt_create_socket.argtypes = []
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
-        self.last_error()
+        self.getlasterror()
         return ss
 
-    def set_sock_flag(self, flag, val):
+    def setsockflag(self, flag, val):
         """
-        set_sock_flag  set_sock_flag
+        setsockflag  setsockflag
         the flag is one from statiic.SRT_SOCKOPTS
         flag is set to val
         """
@@ -192,7 +192,7 @@ class SRTKabuki:
             self.libsrt.srt_setsockflag(self.sock, flag,  ctypes.byref(val), ctypes.sizeof(val))
         else:
             print("if you want to add a flag, make a socket first")
-        self.last_error()
+        self.getlasterror()
 
     def bind(self):
         """
@@ -201,7 +201,7 @@ class SRTKabuki:
         self.libsrt.srt_bind.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int]
         self.libsrt.srt_bind.restype = ctypes.c_int
         self.libsrt.srt_bind(self.sock, self.sa_ptr, self.sa_size)
-        self.last_error()
+        self.getlasterror()
 
     def listen(self):
         """
@@ -210,14 +210,30 @@ class SRTKabuki:
         self.libsrt.srt_listen.argtypes = [ctypes.c_int, ctypes.c_int]
         self.libsrt.srt_listen.restype = ctypes.c_int
         self.libsrt.srt_listen(self.sock, 2)
-        self.last_error()
+        self.getlasterror()
 
-    def connect(self):
+    def connect(self,host,port):
         """
-        connect  is srt_connect()
+        connect connect to  host on port 
         """
-        self.libsrt.srt_connect(self.sock, self.sa_ptr, self.sa_size)
-        self.last_error()
+        hints = addrinfo(ai_family=AF_INET, ai_socktype=SOCK_DGRAM)
+        peer = ctypes.POINTER(addrinfo)()
+        if (
+            self.getaddrinfo(
+                host.encode("utf-8"),
+                port.encode("utf-8"),
+                ctypes.byref(hints),
+                ctypes.byref(peer),
+            )
+            != 0
+        ):
+            print(f"getaddrinfo failed for {server_ip}:{server_port}", file=sys.stderr)
+            return -1
+        self.libsrt.srt_connect(
+            self.sock, peer.contents.ai_addr, peer.contents.ai_addrlen
+        )
+        self.freeaddrinfo(peer)
+        self.getlasterror()
 
     def accept(self):
         """
@@ -237,30 +253,30 @@ class SRTKabuki:
         self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         self.libsrt.srt_recvmsg.restype = ctypes.c_int
 
-    def byte_mesg(self, mesg):
+    def bytemsg(self, msg):
         """
-        byte_mesg convert python byte string
+        bytemsg convert python byte string
         to a C string buffer
         """
-        if not isinstance(mesg, bytes):
-            mesg = b"Message needs to be bytes"
-        return ctypes.create_string_buffer(mesg, len(mesg))
+        if not isinstance(msg, bytes):
+            msg = b"Message needs to be bytes"
+        return ctypes.create_string_buffer(msg, len(msg))
 
-    def send_mesg(self, mesg):
+    def sendmsg2(self, msg):
         """
-        send_mesg format byte string for C
+        sendmsg2 format byte string for C
         and write it to the socket
         """
-        mesg = self.byte_mesg(mesg)
-        st = self.libsrt.srt_sendmsg2(self.sock, mesg, ctypes.sizeof(mesg), None)
-        self.last_error()
+        msg = self.bytemsg(msg)
+        st = self.libsrt.srt_sendmsg2(self.sock, msg, ctypes.sizeof(msg), None)
+        self.getlasterror()
 
-    def send(self, mesg):
+    def send(self, msg):
         """
         send srt_send
         """
-        self.libsrt.srt_send(self.sock, mesg, ctypes.sizeof(mesg))
-        self.last_error()
+        self.libsrt.srt_send(self.sock, msg, ctypes.sizeof(msg))
+        self.getlasterror()
 
     def close(self):
         """
@@ -277,25 +293,35 @@ class SRTKabuki:
         self.libsrt.srt_cleanup.restype = None
 
     def request_file(self, remote_file):
+        """
+        request_file request a file from a server
+        """
         remote_filename = remote_file.encode("utf8")
-        mesg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
+        msg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
         rfl = str(len(remote_filename)).encode("utf8")  # remote file length
         rflen = ctypes.create_string_buffer(
             rfl, len(rfl)
         )  # remote file length written to a string buffer
-        self.libsrt.srt_send(self.sock, rflen, ctypes.sizeof(ctypes.c_int(len(mesg))))
-        self.libsrt.srt_send(self.sock, mesg, len(mesg))
-        self.last_error()
+        self.libsrt.srt_send(self.sock, rflen, ctypes.sizeof(ctypes.c_int(len(msg))))
+        self.libsrt.srt_send(self.sock, msg, len(msg))
+        self.getlasterror()
 
     def remote_file_size(self):
+        """
+        remote_file_size receive a message from a server
+        with the size of the file just requested.
+        """
         buffer_size = 20
         buffer = ctypes.create_string_buffer(buffer_size)
         self.libsrt.srt_recv(self.sock, buffer, ctypes.sizeof(buffer))
         file_size = int.from_bytes(buffer.value, byteorder="little")
-        self.last_error()
+        self.getlasterror()
         return file_size
 
     def recv_file(self,local_file):
+        """
+        recv_file receive a file and write it to local_file
+        """
         remote_size = self.remote_file_size()
         offset_val = ctypes.c_int64(0)
         recvsize = self.libsrt.srt_recvfile(
@@ -305,28 +331,18 @@ class SRTKabuki:
             remote_size,
             SRT_DEFAULT_RECVFILE_BLOCK,
         )
-        self.last_error()
+        self.getlasterror()
 
     def fetch(self, host, port, remote_file, local_file):
+        """
+        fetch fetch remote_file fron host on port
+        and save it as local_file
+
+        all args are strings.
+        """
         yes = ctypes.c_int(1)
-        self.set_sock_flag(SRTO_TRANSTYPE,yes)
-        hints = addrinfo(ai_family=AF_INET, ai_socktype=SOCK_DGRAM)
-        peer = ctypes.POINTER(addrinfo)()
-        if (
-            self.getaddrinfo(
-                host.encode("utf-8"),
-                port.encode("utf-8"),
-                ctypes.byref(hints),
-                ctypes.byref(peer),
-            )
-            != 0
-        ):
-            print(f"getaddrinfo failed for {server_ip}:{server_port}", file=sys.stderr)
-            return -1
-        self.libsrt.srt_connect(
-            self.sock, peer.contents.ai_addr, peer.contents.ai_addrlen
-        )
-        self.freeaddrinfo(peer)
+        self.setsockflag(SRTO_TRANSTYPE,yes)
+        self.connect(host,port)
         self.request_file(remote_file)
         self.recv_file(local_file)
-        self.last_error()
+        self.getlasterror()

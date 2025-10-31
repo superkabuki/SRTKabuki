@@ -4,12 +4,23 @@ srtkabuki.py
 """
 
 import ctypes
-import inspect
-import socket
+import ctypes.util
 import sys
-import time
+import os
+import socket
+import struct
 
-SRTO_RCVSYN = 29
+
+from static import (
+    SRT_DEFAULT_RECVFILE_BLOCK,
+    SRTO_TRANSTYPE,
+    SOCK_DGRAM,
+    AF_INET,
+    AI_PASSIVE,
+    SRT_ERROR,
+)
+
+# SRTO_RCVSYN = 29
 
 # Socket Address structures
 
@@ -117,7 +128,6 @@ class SRTKabuki:
         take a ipv4 string addr and make it an int
         """
         sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
-        print(f"SA {sa}")
         return sa
 
     def mk_sockaddr_ptr(self):
@@ -182,7 +192,7 @@ class SRTKabuki:
         ]
         self.libsrt.srt_setsockflag.restype = ctypes.c_int
         if self.sock:
-            self.libsrt.srt_setsockflag(self.sock, flag, 1, 32)
+            self.libsrt.srt_setsockflag(self.sock, flag,  ctypes.byref(val), ctypes.sizeof(val))
         else:
             print("if you want to add a flag, make a socket first")
         self.last_error()
@@ -252,7 +262,7 @@ class SRTKabuki:
         """
         send srt_send
         """
-        libsrt.srt_send(self.sock, mesg, ctypes.sizeof(mesg))
+        self.libsrt.srt_send(self.sock, mesg, ctypes.sizeof(mesg))
         self.last_error()
 
     def close(self):
@@ -268,3 +278,54 @@ class SRTKabuki:
         """
         self.libsrt.srt_cleanup.argtypes = []
         self.libsrt.srt_cleanup.restype = None
+
+    def request_file(self, remote_file):
+        remote_filename = remote_file.encode("utf8")
+        mesg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
+        rfl = str(len(remote_filename)).encode("utf8")  # remote file length
+        rflen = ctypes.create_string_buffer(
+            rfl, len(rfl)
+        )  # remote file length written to a string buffer
+        self.libsrt.srt_send(self.sock, rflen, ctypes.sizeof(ctypes.c_int(len(mesg))))
+        self.libsrt.srt_send(self.sock, mesg, len(mesg))
+        self.last_error()
+
+    def remote_file_size(self):
+        buffer_size = 20
+        buffer = ctypes.create_string_buffer(buffer_size)
+        self.libsrt.srt_recv(self.sock, buffer, ctypes.sizeof(buffer))
+        file_size = int.from_bytes(buffer.value, byteorder="little")
+        self.last_error()
+        return file_size
+
+    def fetch(self, host, port, remote_file, local_file):
+        yes = ctypes.c_int(1)
+        self.set_sock_flag(SRTO_TRANSTYPE,yes)
+        hints = addrinfo(ai_family=AF_INET, ai_socktype=SOCK_DGRAM)
+        peer = ctypes.POINTER(addrinfo)()
+        if (
+            self.getaddrinfo(
+                host.encode("utf-8"),
+                port.encode("utf-8"),
+                ctypes.byref(hints),
+                ctypes.byref(peer),
+            )
+            != 0
+        ):
+            print(f"getaddrinfo failed for {server_ip}:{server_port}", file=sys.stderr)
+            return -1
+        self.libsrt.srt_connect(
+            self.sock, peer.contents.ai_addr, peer.contents.ai_addrlen
+        )
+        self.freeaddrinfo(peer)
+        self.request_file(remote_file)
+        remote_size = self.remote_file_size()
+        offset_val = ctypes.c_int64(0)
+        recvsize = self.libsrt.srt_recvfile(
+            self.sock,
+            local_file.encode("utf-8"),
+            ctypes.byref(offset_val),
+            remote_size,
+            SRT_DEFAULT_RECVFILE_BLOCK,
+        )
+        self.last_error()

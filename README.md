@@ -188,177 +188,68 @@ fetch: Success
 ___
 
 # Here's where I'm at so far.
-```py3
-Help on class SRTKabuki in module srtkabuki:
-
-class SRTKabuki(builtins.object)
- |  Methods defined here:
- |  
- |  __init__(self)
- |      Initialize self.  See help(type(self)) for accurate signature.
- |  
- |  accept(self)
- |      accept srt_accept
- |  
- |  bind(self)
- |      bind  srt_bind
- |  
- |  bytemsg(self, msg)
- |      bytemsg convert python byte string
- |      to a C string buffer
- |  
- |  cleanup(self)
- |      cleanup srt_cleanup
- |  
- |  close(self)
- |      close srt_close
- |  
- |  connect(self, host, port)
- |      connect connect to  host on port
- |  
- |  create_socket(self)
- |      create_socket srt_create_socket
- |      and return it
- |  
- |  fetch(self, host, port, remote_file, local_file)
- |      fetch fetch remote_file fron host on port
- |      and save it as local_file
- |  
- |  getlasterror(self)
- |      getlasterror srt_getlasterror_str
- |      
- |  ipv4int(self, addr)
- |      take a ipv4 string addr and make it an int
- |  
- |  listen(self)
- |      listen srt_listen
- |  
- |  load_libc(self)
- |      load_libc load getaddrinfo and freeaddrinfo from libc.so
- |  
- |  load_srt(self)
- |      load_srt load everything from libsrt.so
- |  
- |  mk_sockaddr_ptr(self)
- |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
- |  
- |  recv_file(self, local_file)
- |      recv_file receive a file and write it to local_file
- |   
- |  recvmsg(self)
- |      recvmsg srt_recvmsg
- |  
- |  remote_file_size(self)
- |      remote_file_size receive a message from a server
- |      with the size of the file just requested.
- |  
- |  request_file(self, remote_file)
- |      request_file request a file from a server
- |  
- |  send(self, msg)
- |      send srt_send
- |  
- |  sendmsg2(self, msg)
- |      sendmsg2 format byte string for C
- |      and write it to the socket
- |  
- |  setsockflag(self, flag, val)
- |      setsockflag  setsockflag
- |      the flag is one from statiic.SRT_SOCKOPTS
- |      flag is set to val
- |  
- |  startup(self)
- |      startup  srt_startup()
 
 
-DATA
+# SRT API Functions
 
-    AF_INET = <AddressFamily.AF_INET: 2>
-    AI_PASSIVE = <AddressInfo.AI_PASSIVE: 1>
-    SOCK_DGRAM = <SocketKind.SOCK_DGRAM: 2>
-    SRTO_BINDTODEVICE = 56
-    SRTO_CONGESTION = 47
-    SRTO_CONNTIMEO = 36
-    SRTO_CRYPTOMODE = 62
-    SRTO_DRIFTTRACER = 37
-    SRTO_ENFORCEDENCRYPTION = 53
-    SRTO_EVENT = 18
-    SRTO_FC = 4
-    SRTO_GROUPCONNECT = 57
-    SRTO_GROUPMINSTABLETIMEO = 58
-    SRTO_GROUPTYPE = 59
-    SRTO_INPUTBW = 24
-    SRTO_IPTOS = 30
-    SRTO_IPTTL = 29
-    SRTO_IPV6ONLY = 54
-    SRTO_ISN = 3
-    SRTO_KMPREANNOUNCE = 52
-    SRTO_KMREFRESHRATE = 51
-    SRTO_KMSTATE = 28
-    SRTO_LATENCY = 23
-    SRTO_LINGER = 7
-    SRTO_LOSSMAXTTL = 42
-    SRTO_MAXBW = 16
-    SRTO_MAXREXMITBW = 63
-    SRTO_MESSAGEAPI = 48
-    SRTO_MININPUTBW = 38
-    SRTO_MINVERSION = 45
-    SRTO_MSS = 0
-    SRTO_NAKREPORT = 33
-    SRTO_OHEADBW = 25
-    SRTO_PACKETFILTER = 60
-    SRTO_PASSPHRASE = 26
-    SRTO_PAYLOADSIZE = 49
-    SRTO_PBKEYLEN = 27
-    SRTO_PEERIDLETIMEO = 55
-    SRTO_PEERLATENCY = 44
-    SRTO_PEERVERSION = 35
-    SRTO_RCVBUF = 6
-    SRTO_RCVDATA = 20
-    SRTO_RCVKMSTATE = 41
-    SRTO_RCVLATENCY = 43
-    SRTO_RCVSYN = 2
-    SRTO_RCVTIMEO = 14
-    SRTO_RENDEZVOUS = 12
-    SRTO_RETRANSMITALGO = 61
-    SRTO_REUSEADDR = 15
-    SRTO_SENDER = 21
-    SRTO_SNDBUF = 5
-    SRTO_SNDDATA = 19
-    SRTO_SNDDROPDELAY = 32
-    SRTO_SNDKMSTATE = 40
-    SRTO_SNDSYN = 1
-    SRTO_SNDTIMEO = 13
-    SRTO_STATE = 17
-    SRTO_STREAMID = 46
-    SRTO_SNDTIMEO = 13
-    SRTO_STATE = 17
-    SRTO_STREAMID = 46
-    SRTO_TLPKTDROP = 31
-    SRTO_TRANSTYPE = 50
-    SRTO_TSBPDMODE = 22
-    SRTO_UDP_RCVBUF = 9
-    SRTO_UDP_SNDBUF = 8
-    SRTO_VERSION = 34
-    SRTS_BROKEN = 6
-    SRTS_CLOSED = 8
-    SRTS_CLOSING = 7
-    SRTS_CONNECTED = 5
-    SRTS_CONNECTING = 4
-    SRTS_INIT = 1
-    SRTS_LISTENING = 3
-    SRTS_NONEXIST = 9
-    SRTS_OPENED = 2
-    SRT_DEFAULT_RECVFILE_BLOCK = 7200
-    SRT_ERROR = -1
-    SRT_FILE = 1
-    SRT_INVALID = 2
-    SRT_LIVE = 0
-    SRT_LIVE_DEF_LATENCY_MS = 120
-    SRT_LIVE_DEF_PLSIZE = 1316
-    SRT_LIVE_MAX_PLSIZE = 1456
+<h3 id="Library Initialization">Library Initialization</h3>
 
-```
+| *Function / Structure*                            | *Description*                                                    | status                                              |
+|:------------------------------------------------- |:-----------------------------------------------------------------|:--------------------------------------------- |
+| [srt_startup](#srt_startup)                       | Called at the start of an application that uses the SRT library          | done                                      |
+| [srt_cleanup](#srt_cleanup)                       | Cleans up global SRT resources before exiting an application             | done                               |
+| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
 
 
+<h3 id="creating-and-configuring-sockets">Creating and Configuring Sockets</h3>
+
+| *Function / Structure*                            | *Description*                                                     | status                                             |
+|:------------------------------------------------- |:------------------------------------------------------------------|:-------------------------------------------- |
+| [srt_socket](#srt_socket)                         | Deprecated                                                                | skipped                                     |
+| [srt_create_socket](#srt_create_socket)           | Creates an SRT socket                                                     | done                                     |
+| [srt_bind](#srt_bind)                             | Binds a socket to a local address and port                                | done                                     |
+| [srt_bind_acquire](#srt_bind_acquire)             | Acquires a given UDP socket instead of creating one                       | pending                                     |
+| [srt_getsockstate](#srt_getsockstate)             | Gets the current status of the socket                                    | pending                                         |
+| [srt_getsndbuffer](#srt_getsndbuffer)             | Retrieves information about the sender buffer                           | pending                                          |
+| [srt_close](#srt_close)                           | Closes the socket or group and frees all used resources                 | done                                       |
+| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
+
+<h3 id="connecting">Connecting</h3>
+
+| *Function / Structure*                            | *Description*                                                                 | status                                 |
+|:------------------------------------------------- |:-------------------------------------------------------------------------|:------------------------------------- |
+| [srt_listen](#srt_listen)                         | Sets up the listening state on a socket                                  | done                                      |
+| [srt_accept](#srt_accept)                         | Accepts a connection; creates/returns a new socket or group ID          | done                                       |
+| [srt_accept_bond](#srt_accept_bond)               | Accepts a connection pending on any sockets passed in the `listeners` array <br/> of `nlisteners` size | pending               |
+| [srt_listen_callback](#srt_listen_callback)       | Installs/executes a callback hook on a socket created to handle the incoming connection <br/> on a listening socket  | pending |
+| [srt_connect](#srt_connect)                       | Connects a socket or a group to a remote party with a specified address and port       | done                        |
+| [srt_connect_bind](#srt_connect_bind)             | Same as [`srt_bind`](#srt_bind) then [`srt_connect`](#srt_connect) if called with socket [`u`](#u) | pending               |
+| [srt_connect_debug](#srt_connect_debug)           | Same as [`srt_connect`](#srt_connect)but allows specifying ISN (developers only)  | pending                                |
+| [srt_rendezvous](#srt_rendezvous)                 | Performs a rendezvous connection                                                              | pending                    |
+| [srt_connect_callback](#srt_connect_callback)     | Installs/executes a callback hook on socket/group [`u`](#u) after connection resolution/failure           | pending        |
+| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
+
+
+<h3 id="helper-data-types-for-transmission">Helper Data Types for Transmission</h3>
+
+| *Function / Structure*                            | *Description*                         | status                                                                          |
+|:------------------------------------------------- |:-------------------------------------|:------------------------------------------------------------------------- |
+| [SRT_MSGCTRL](#SRT_MSGCTRL)                       | Used in [`srt_sendmsg2`](#srt_sendmsg) and [`srt_recvmsg2`](#srt_recvmsg2) calls; <br/> specifies some extra parameters | done  |
+| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
+
+<h3 id="transmission">Transmission</h3>
+
+| *Function / Structure*                            | *Description*                                          | status                                                        |
+|:------------------------------------------------- |:-------------------------------------------------------|:------------------------------------------------------- |
+| [srt_send](#srt_send)                             | Sends a payload to a remote party over a given socket          | done                                                |
+| [srt_sendmsg](#srt_sendmsg)                       | Sends a payload to a remote party over a given socket                | pending                                             |
+| [srt_sendmsg2](#srt_sendmsg2)                     | Sends a payload to a remote party over a given socket        | done                                                  |
+| [srt_recv](#srt_recv)                             | Extracts the payload waiting to be received                        | done                                            |
+| [srt_recvmsg](#srt_recvmsg)                       | Extracts the payload waiting to be received                              | done                                      |
+| [srt_recvmsg2](#srt_recvmsg2)                     | Extracts the payload waiting to be received                                    | pending                                |
+| [srt_sendfile](#srt_sendfile)                     | Function dedicated to sending a file                                | pending                                           |
+| [srt_recvfile](#srt_recvfile)                     | Function dedicated to receiving a file                        | done                                                 |
+| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
+
+               |           |          
 

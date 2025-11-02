@@ -189,67 +189,88 @@ ___
 
 # Here's where I'm at so far.
 
+```py3
+Help on class SRTKabuki in module srtkabuki:
 
-# SRT API Functions
-
-<h3 id="Library Initialization">Library Initialization</h3>
-
-| *Function / Structure*                            | *Description*                                                    | status                                              |
-|:------------------------------------------------- |:-----------------------------------------------------------------|:--------------------------------------------- |
-| [srt_startup](#srt_startup)                       | Called at the start of an application that uses the SRT library          | done                                      |
-| [srt_cleanup](#srt_cleanup)                       | Cleans up global SRT resources before exiting an application             | done                               |
-| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
-
-
-<h3 id="creating-and-configuring-sockets">Creating and Configuring Sockets</h3>
-
-| *Function / Structure*                            | *Description*                                                     | status                                             |
-|:------------------------------------------------- |:------------------------------------------------------------------|:-------------------------------------------- |
-| [srt_socket](#srt_socket)                         | Deprecated                                                                | skipped                                     |
-| [srt_create_socket](#srt_create_socket)           | Creates an SRT socket                                                     | done                                     |
-| [srt_bind](#srt_bind)                             | Binds a socket to a local address and port                                | done                                     |
-| [srt_bind_acquire](#srt_bind_acquire)             | Acquires a given UDP socket instead of creating one                       | pending                                     |
-| [srt_getsockstate](#srt_getsockstate)             | Gets the current status of the socket                                    | pending                                         |
-| [srt_getsndbuffer](#srt_getsndbuffer)             | Retrieves information about the sender buffer                           | pending                                          |
-| [srt_close](#srt_close)                           | Closes the socket or group and frees all used resources                 | done                                       |
-| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
-
-<h3 id="connecting">Connecting</h3>
-
-| *Function / Structure*                            | *Description*                                                                 | status                                 |
-|:------------------------------------------------- |:-------------------------------------------------------------------------|:------------------------------------- |
-| [srt_listen](#srt_listen)                         | Sets up the listening state on a socket                                  | done                                      |
-| [srt_accept](#srt_accept)                         | Accepts a connection; creates/returns a new socket or group ID          | done                                       |
-| [srt_accept_bond](#srt_accept_bond)               | Accepts a connection pending on any sockets passed in the `listeners` array <br/> of `nlisteners` size | pending               |
-| [srt_listen_callback](#srt_listen_callback)       | Installs/executes a callback hook on a socket created to handle the incoming connection <br/> on a listening socket  | pending |
-| [srt_connect](#srt_connect)                       | Connects a socket or a group to a remote party with a specified address and port       | done                        |
-| [srt_connect_bind](#srt_connect_bind)             | Same as [`srt_bind`](#srt_bind) then [`srt_connect`](#srt_connect) if called with socket [`u`](#u) | pending               |
-| [srt_connect_debug](#srt_connect_debug)           | Same as [`srt_connect`](#srt_connect)but allows specifying ISN (developers only)  | pending                                |
-| [srt_rendezvous](#srt_rendezvous)                 | Performs a rendezvous connection                                                              | pending                    |
-| [srt_connect_callback](#srt_connect_callback)     | Installs/executes a callback hook on socket/group [`u`](#u) after connection resolution/failure           | pending        |
-| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
-
-
-<h3 id="helper-data-types-for-transmission">Helper Data Types for Transmission</h3>
-
-| *Function / Structure*                            | *Description*                         | status                                                                          |
-|:------------------------------------------------- |:-------------------------------------|:------------------------------------------------------------------------- |
-| [SRT_MSGCTRL](#SRT_MSGCTRL)                       | Used in [`srt_sendmsg2`](#srt_sendmsg) and [`srt_recvmsg2`](#srt_recvmsg2) calls; <br/> specifies some extra parameters | done  |
-| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
-
-<h3 id="transmission">Transmission</h3>
-
-| *Function / Structure*                            | *Description*                                          | status                                                        |
-|:------------------------------------------------- |:-------------------------------------------------------|:------------------------------------------------------- |
-| [srt_send](#srt_send)                             | Sends a payload to a remote party over a given socket          | done                                                |
-| [srt_sendmsg](#srt_sendmsg)                       | Sends a payload to a remote party over a given socket                | pending                                             |
-| [srt_sendmsg2](#srt_sendmsg2)                     | Sends a payload to a remote party over a given socket        | done                                                  |
-| [srt_recv](#srt_recv)                             | Extracts the payload waiting to be received                        | done                                            |
-| [srt_recvmsg](#srt_recvmsg)                       | Extracts the payload waiting to be received                              | done                                      |
-| [srt_recvmsg2](#srt_recvmsg2)                     | Extracts the payload waiting to be received                                    | pending                                |
-| [srt_sendfile](#srt_sendfile)                     | Function dedicated to sending a file                                | pending                                           |
-| [srt_recvfile](#srt_recvfile)                     | Function dedicated to receiving a file                        | done                                                 |
-| <img width=290px height=1px/>                     | <img width=720px height=1px/>                                                                                  |
-
-               |           |          
+class SRTKabuki(builtins.object)
+ |  Methods defined here:
+ |  
+ |  __init__(self)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  accept(self)
+ |      accept srt_accept
+ |  
+ |  bind(self)
+ |      bind  srt_bind
+ |  
+ |  bytemsg(self, msg)
+ |      bytemsg convert python byte string
+ |      to a C string buffer
+ |  
+ |  cleanup(self)
+ |      cleanup srt_cleanup
+ |  
+ |  close(self)
+ |      close srt_close
+ |  
+ |  connect(self, host, port)
+ |      connect connect to  host on port
+ |  
+ |  create_socket(self)
+ |      create_socket srt_create_socket
+ |      and return it
+ |  
+ |  fetch(self, host, port, remote_file, local_file)
+ |      fetch fetch remote_file fron host on port
+ |      and save it as local_file
+|  getlasterror(self)
+ |      getlasterror srt_getlasterror_str
+ |      
+ |      **** I realize it will set argtypes and restype repeatedly
+ |      and I say it doesn't matter.
+ |  
+ |  ipv4int(self, addr)
+ |      take a ipv4 string addr and make it an int
+ |  
+ |  listen(self)
+ |      listen srt_listen
+ |  
+ |  load_libc(self)
+ |      load_libc load getaddrinfo and freeaddrinfo from libc.so
+ |  
+ |  load_srt(self)
+ |      load_srt load everything from libsrt.so
+ |  
+ |  mk_sockaddr_ptr(self)
+ |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
+ |  
+ |  recv(self)
+ |      recv srt_recv
+ |  
+ |  recvfile(self, local_filename)
+ |      recvfile srt_recvfile
+ |  
+ |  recvmsg(self)
+ |      recvmsg srt_recvmsg
+ |  
+ |  request_file(self, remote_file)
+ |      request_file request a file from a server
+ |  
+ |  send(self, msg)
+|      send srt_send
+ |  
+ |  sendmsg2(self, msg)
+ |      sendmsg2 format byte string for C
+ |      and write it to the socket
+ |  
+ |  setsockflag(self, flag, val)
+ |      setsockflag  setsockflag
+ |      the flag is one from statiic.SRT_SOCKOPTS
+ |      flag is set to val
+ |  
+ |  startup(self)
+ |      startup  srt_startup()
+ |  
+```
 

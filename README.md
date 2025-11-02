@@ -215,20 +215,17 @@ class SRTKabuki(builtins.object)
  |      close srt_close
  |  
  |  connect(self, host, port)
- |      connect connect to  host on port
+ |      connect srt_connect
  |  
  |  create_socket(self)
  |      create_socket srt_create_socket
- |      and return it
  |  
  |  fetch(self, host, port, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
-|  getlasterror(self)
- |      getlasterror srt_getlasterror_str
- |      
- |      **** I realize it will set argtypes and restype repeatedly
- |      and I say it doesn't matter.
+ |
+ | getlasterror(self)
+ |      getlasterror srt_getlasterror
  |  
  |  ipv4int(self, addr)
  |      take a ipv4 string addr and make it an int
@@ -258,7 +255,7 @@ class SRTKabuki(builtins.object)
  |      request_file request a file from a server
  |  
  |  send(self, msg)
-|      send srt_send
+ |      send srt_send
  |  
  |  sendmsg2(self, msg)
  |      sendmsg2 format byte string for C

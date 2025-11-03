@@ -7,6 +7,7 @@ import ctypes
 import ctypes.util
 import sys
 import os
+import time
 import socket
 import struct
 import inspect
@@ -82,17 +83,17 @@ class sockaddr_storage(ctypes.Structure):
 
 class SRTKabuki:
 
-    def __init__(self):
-        self.addr = "0.0.0.0"
-        self.port = 9000
+    def __init__(self, addr="0.0.0.0", port=9000):
+        self.addr = addr
+        self.port = port
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
+        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr()
         self.sock = self.create_socket()
         self.peer_addr = None
         self.peer_addr_size = None
         self.peer_sock = None
-        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr(self.sock,self.addr,self.port)
 
     def load_libc(self):
         """
@@ -127,11 +128,6 @@ class SRTKabuki:
         """
         accept srt_accept
         """
-        ##        self.libsrt.srt_accept.argtypes = [
-        ##            ctypes.c_int,
-        ##            ctypes.POINTER(sockaddr),
-        ##            ctypes.POINTER(ctypes.c_int),
-        ##        ]
         self.libsrt.srt_accept.restype = ctypes.c_int
         self.peer_addr = sockaddr_storage()
         self.peer_addr_size = ctypes.c_int(ctypes.sizeof(self.peer_addr))
@@ -165,27 +161,11 @@ class SRTKabuki:
         self.libsrt.srt_close(self.sock)
         self.getlasterror()
 
-    def connect(self, sock,addr, port):
+    def connect(self):
         """
         connect connect to  host on port
         """
-        hints = addrinfo(ai_family=AF_INET, ai_socktype=SOCK_DGRAM)
-        target = ctypes.POINTER(addrinfo)()
-        if (
-            self.getaddrinfo(
-                addr.encode("utf-8"),
-                port.encode("utf-8"),
-                ctypes.byref(hints),
-                ctypes.byref(target),
-            )
-            != 0
-        ):
-            print(f"getaddrinfo failed for {server_ip}:{server_port}", file=sys.stderr)
-            return -1
-        self.libsrt.srt_connect(
-            sock, target.contents.ai_addr, target.contents.ai_addrlen
-        )
-        self.freeaddrinfo(target)
+        self.libsrt.srt_connect(self.sock, self.sa_ptr, self.sa_size)
         self.getlasterror()
 
     def create_socket(self):
@@ -253,7 +233,7 @@ class SRTKabuki:
         recvmsg srt_recvmsg
         """
         self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        self.libsrt.srt_recvmsg.restype = ctypes.c_int
+        #  self.libsrt.srt_recvmsg.restype = ctypes.c_int
         st = self.libsrt.srt_recvmsg(
             self.peer_sock, msg_buffer, ctypes.sizeof(msg_buffer)
         )
@@ -273,7 +253,9 @@ class SRTKabuki:
         """
         msg = self.bytemsg(msg)
         st = self.libsrt.srt_sendmsg2(self.sock, msg, ctypes.sizeof(msg), None)
-        self.getlasterror()
+        if st:
+            self.getlasterror()
+        time.sleep(0.1)
 
     def setsockflag(self, flag, val):
         """
@@ -288,6 +270,7 @@ class SRTKabuki:
             ctypes.c_int,
         ]
         self.libsrt.srt_setsockflag.restype = ctypes.c_int
+        val = ctypes.c_int(val)
         if self.sock:
             self.libsrt.srt_setsockflag(
                 self.sock, flag, ctypes.byref(val), ctypes.sizeof(val)
@@ -305,7 +288,7 @@ class SRTKabuki:
         self.libsrt.srt_startup()
         self.getlasterror()
 
-    # helper methiods not in libsrt
+    # helper methods not in libsrt
 
     def ipv4int(self, addr):
         """
@@ -314,14 +297,14 @@ class SRTKabuki:
         sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
         return sa
 
-    def mk_sockaddr_ptr(self, sock,addr,port):
+    def mk_sockaddr_ptr(self):
         """
         mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
         """
         sa_in = sockaddr_in()
         sa_in.sin_family = socket.AF_INET
-        sa_in.sin_port = socket.htons(port)
-        sa_in.sin_addr.s_addr = self.ipv4int(addr)
+        sa_in.sin_port = socket.htons(self.port)
+        sa_in.sin_addr.s_addr = self.ipv4int(self.addr)
         # socket.inet_pton(socket.AF_INET, addr)
         # Get a pointer to sa_in
         sa_in_ptr = ctypes.pointer(sa_in)
@@ -351,7 +334,7 @@ class SRTKabuki:
         self.send(msg)
         self.getlasterror()
 
-    def fetch(self, host, port, remote_file, local_file):
+    def fetch(self, remote_file, local_file):
         """
         fetch fetch remote_file fron host on port
         and save it as local_file
@@ -360,7 +343,7 @@ class SRTKabuki:
         """
         yes = ctypes.c_int(1)
         self.setsockflag(SRTO_TRANSTYPE, yes)
-        self.connect(self.sock,host, port)
+        self.connect()
         self.request_file(remote_file)
         self.recvfile(local_file)
         self.close()

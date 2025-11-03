@@ -1,5 +1,5 @@
 '''
-This is a rewrite of the test-c-server.c in the libsrt examples in python.
+This is SRTKabuki version of examples/test-c-server.c in libsrt.
 https://github.com/Haivision/srt/blob/master/examples/test-c-server.c
 '''
 

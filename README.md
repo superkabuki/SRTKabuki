@@ -33,10 +33,10 @@ ___
 ___
 
 
-___
+
 ### Examples 
 look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.
-
+___
 # Here's where I'm at so far.
 
 ```py3

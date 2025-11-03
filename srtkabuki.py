@@ -165,7 +165,7 @@ class SRTKabuki:
     def create_socket(self):
         """
         create_socket srt_create_socket
-        and return it
+
         """
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
@@ -176,8 +176,6 @@ class SRTKabuki:
         """
         getlasterror srt_getlasterror_str
 
-        **** I realize it will set argtypes and restype repeatedly
-        and I say it doesn't matter.
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
@@ -229,6 +227,7 @@ class SRTKabuki:
         st = self.libsrt.srt_recvmsg(
             self.peer_sock, msg_buffer, ctypes.sizeof(msg_buffer)
         )
+        self.getlasterror()
         return st
 
     def send(self, msg):
@@ -254,13 +253,6 @@ class SRTKabuki:
         the flag is one from statiic.SRT_SOCKOPTS
         flag is set to val
         """
-##        self.libsrt.srt_setsockflag.argtypes = [
-##            ctypes.c_int,
-##            ctypes.c_int32,
-##            ctypes.c_void_p,
-##            ctypes.c_int,
-##        ]
- #       self.libsrt.srt_setsockflag.restype = ctypes.c_int
         val = ctypes.c_int(val)
         self.libsrt.srt_setsockflag(
                 self.sock, flag, ctypes.byref(val), ctypes.sizeof(val)
@@ -281,6 +273,7 @@ class SRTKabuki:
         take a ipv4 string addr and make it an int
         """
         sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
+        self.getlasterror()
         return sa
 
     def mk_sockaddr_ptr(self):

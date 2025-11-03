@@ -24,7 +24,7 @@ ___
 
 ___
 
-### To be honest, I don't find libsrt0 super intuitive, so I'm not just wrapping it, I'm trying to make it a bit more friendly. 
+### To be honest, I don't find libsrt super intuitive, so I'm not just wrapping it, I'm trying to make it a bit more friendly. 
 
 <details><summary>Here's the recvfile.cpp from the examples </summary>
 

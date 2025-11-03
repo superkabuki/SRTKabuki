@@ -149,42 +149,23 @@ int main(int argc, char* argv[])
 <details><summary>Here's my implentation of recvfile, it's not as complete,but it's a bit more concise</summary>
 
 ```py3
-    def fetch(self, host, port, remote_file, local_file):
-        """
-        fetch fetch remote_file fron host on port
-        and save it as local_file
-        """
-        yes = ctypes.c_int(1)
-        self.setsockflag(SRTO_TRANSTYPE,yes)
-        self.connect(host,port)
-        self.request_file(remote_file)
-        self.recv_file(local_file)
-        self.getlasterror()
+
+        #!/usr/bin/env python3
+
+        import sys
+        from srtkabuki import SRTKabuki
+
+        host = sys.argv[1]
+        port = sys.argv[2]
+        remote_file = sys.argv[3]
+        local_file = sys.argv[4]
+
+        srtk=SRTKabuki()
+        srtk.fetch(host,port,remote_file,local_file)
 ```
 
 </details>
-
-#### If you don't find my way very intuitive, all the functions are being mapped to methods so you do it almost the same way as libsrt.
-* SRTKabuki method names are the libsrt functions without the `srt_` prefix.  
-___
-
-### Download a file over SRT with SRTKabuki in three lines of code
-
-```py3
-Python 3.11.2 (main, Apr 28 2025, 14:11:48) [GCC 12.2.0] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> from srtkabuki import SRTKabuki    # 1
->>> srtk=SRTKabuki()                   # 2
-startup: Success
-create_socket: Success
->>> srtk.fetch('10.7.1.3','9000','a_b_c.ts','gonzo.ts')   # 3      host, port, remotefile, localfile
-set_sock_flag: Success
-request_file: Success
-remote_file_size: Success
-recv_file: Success
-fetch: Success
->>>
-```
+ 
 ___
 
 # Here's where I'm at so far.

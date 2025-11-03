@@ -6,19 +6,14 @@ srtkabuki.py
 import ctypes
 import ctypes.util
 import sys
-import os
 import time
 import socket
-import struct
 import inspect
 
 
 from static import (
     SRT_DEFAULT_RECVFILE_BLOCK,
     SRTO_TRANSTYPE,
-    SOCK_DGRAM,
-    AF_INET,
-    AI_PASSIVE,
     SRT_ERROR,
 )
 
@@ -121,7 +116,6 @@ class SRTKabuki:
         libsrt = ctypes.CDLL("libsrt.so")
         if not libsrt:
             raise OSError("failed to load libsrt.so")
-            sys.exit(1)
         return libsrt
 
     def accept(self):
@@ -173,7 +167,6 @@ class SRTKabuki:
         create_socket srt_create_socket
         and return it
         """
-        self.libsrt.srt_create_socket.argtypes = []
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
         self.getlasterror()
@@ -186,7 +179,6 @@ class SRTKabuki:
         **** I realize it will set argtypes and restype repeatedly
         and I say it doesn't matter.
         """
-        self.libsrt.srt_getlasterror_str.argtypes = []
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
         print(
@@ -198,7 +190,6 @@ class SRTKabuki:
         listen srt_listen
         """
         self.libsrt.srt_listen.argtypes = [ctypes.c_int, ctypes.c_int]
-        self.libsrt.srt_listen.restype = ctypes.c_int
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
 
@@ -206,7 +197,7 @@ class SRTKabuki:
         """
         recv srt_recv
         """
-        buffer_size = 20
+        buffer_size = 4
         buffer = ctypes.create_string_buffer(buffer_size)
         self.libsrt.srt_recv(self.sock, buffer, ctypes.sizeof(buffer))
         filesize = int.from_bytes(buffer.value, byteorder="little")
@@ -227,6 +218,7 @@ class SRTKabuki:
             SRT_DEFAULT_RECVFILE_BLOCK,
         )
         self.getlasterror()
+        return recvd_size
 
     def recvmsg(self, msg_buffer):
         """
@@ -253,9 +245,8 @@ class SRTKabuki:
         """
         msg = self.bytemsg(msg)
         st = self.libsrt.srt_sendmsg2(self.sock, msg, ctypes.sizeof(msg), None)
-        if st:
-            self.getlasterror()
-        time.sleep(0.1)
+        self.getlasterror()
+        time.sleep(0.001)
 
     def setsockflag(self, flag, val):
         """
@@ -263,28 +254,23 @@ class SRTKabuki:
         the flag is one from statiic.SRT_SOCKOPTS
         flag is set to val
         """
-        self.libsrt.srt_setsockflag.argtypes = [
-            ctypes.c_int,
-            ctypes.c_int32,
-            ctypes.c_void_p,
-            ctypes.c_int,
-        ]
-        self.libsrt.srt_setsockflag.restype = ctypes.c_int
+##        self.libsrt.srt_setsockflag.argtypes = [
+##            ctypes.c_int,
+##            ctypes.c_int32,
+##            ctypes.c_void_p,
+##            ctypes.c_int,
+##        ]
+ #       self.libsrt.srt_setsockflag.restype = ctypes.c_int
         val = ctypes.c_int(val)
-        if self.sock:
-            self.libsrt.srt_setsockflag(
+        self.libsrt.srt_setsockflag(
                 self.sock, flag, ctypes.byref(val), ctypes.sizeof(val)
             )
-        else:
-            print("if you want to add a flag, make a socket first")
         self.getlasterror()
 
     def startup(self):
         """
         startup  srt_startup()
         """
-        self.libsrt.srt_startup.argtypes = []
-        self.libsrt.srt_startup.restype = None
         self.libsrt.srt_startup()
         self.getlasterror()
 
@@ -305,7 +291,6 @@ class SRTKabuki:
         sa_in.sin_family = socket.AF_INET
         sa_in.sin_port = socket.htons(self.port)
         sa_in.sin_addr.s_addr = self.ipv4int(self.addr)
-        # socket.inet_pton(socket.AF_INET, addr)
         # Get a pointer to sa_in
         sa_in_ptr = ctypes.pointer(sa_in)
         #  (struct sockaddr*)&sa
@@ -329,7 +314,7 @@ class SRTKabuki:
         rfl = str(len(remote_filename)).encode("utf8")  # remote file length
         rflen = ctypes.create_string_buffer(
             rfl, len(rfl)
-        )  # remote file length written to a string buffer
+        )  # remote file length written to a string buffer... I don't know.
         self.send(rflen)
         self.send(msg)
         self.getlasterror()
@@ -341,7 +326,7 @@ class SRTKabuki:
 
         all args are strings.
         """
-        yes = ctypes.c_int(1)
+        yes = 1
         self.setsockflag(SRTO_TRANSTYPE, yes)
         self.connect()
         self.request_file(remote_file)

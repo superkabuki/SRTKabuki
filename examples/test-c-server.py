@@ -1,7 +1,3 @@
-'''
-This is SRTKabuki version of examples/test-c-server.c in libsrt.
-https://github.com/Haivision/srt/blob/master/examples/test-c-server.c
-'''
 import ctypes
 import sys
 from srtkabuki import SRTKabuki

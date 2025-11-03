@@ -2,7 +2,6 @@
 This is SRTKabuki version of examples/test-c-server.c in libsrt.
 https://github.com/Haivision/srt/blob/master/examples/test-c-server.c
 '''
-
 import ctypes
 import sys
 from srtkabuki import SRTKabuki
@@ -13,17 +12,14 @@ def main():
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <host> <port>", file=sys.stderr)
         sys.exit(1)
-    srtk = SRTKabuki()
-    srtk.host = sys.argv[1]
-    srtk.port = int(sys.argv[2])
+    srtk = SRTKabuki(addr=sys.argv[1], port=int(sys.argv[2]))
     srtk.create_socket()
-    yes = ctypes.c_int(1)
+    yes = 1
     srtk.setsockflag(SRTO_RCVSYN, yes)
     srtk.bind()
     srtk.listen()
     srtk.accept()
     print("Accepted connection. Waiting for messages...")
-    st = 50
     msg_buffer = ctypes.create_string_buffer(1316)
     while True:
         st = srtk.recvmsg(msg_buffer)

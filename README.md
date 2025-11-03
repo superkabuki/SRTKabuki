@@ -17,7 +17,9 @@ srtk = SRTKabuki(addr,port)
 * method names map to srt_function names _(ex. SRTKabuki.connect is libsrt.srt_connect)_
 
 ___
-
+### SRTKabuki is fast.
+* since it calls libsrt C functions, SRTKabuki runs at C speed.
+___ 
 ###  Get invovled or go away.
 __If you use open source, contribute to open source.__<BR>
 

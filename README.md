@@ -19,154 +19,22 @@ If you're interested in or know SRT, come on and give me a hand so we can do it 
 ___
 
 ### NEWS
+* 11/01/2025 :  rewrote examples test-c-server.c and test-c-client.c, using SRTKabuki and they both work. 
 * 10/30/2025 :  __Today I got basic downloading files over a network using SRT working__,cleaning up code for a new commit. 
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed
-
 ___
 
-### To be honest, I don't find libsrt super intuitive, so I'm not just wrapping it, I'm trying to make it a bit more friendly. 
-
-<details><summary>Here's the recvfile.cpp from the examples </summary>
-
-```cpp
-#ifndef _WIN32
-   #include <arpa/inet.h>
-   #include <netdb.h>
-#else
-   #include <winsock2.h>
-   #include <ws2tcpip.h>
-#endif
-#include <fstream>
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <srt.h>
-
-using namespace std;
-
-int main(int argc, char* argv[])
-{
-   if ((argc != 5) || (0 == atoi(argv[2])))
-   {
-      cout << "usage: recvfile server_ip server_port remote_filename local_filename" << endl;
-      return -1;
-   }
-
-   // Use this function to initialize the UDT library
-   srt_startup();
-
-   srt_setloglevel(srt_logging::LogLevel::debug);
-
-   struct addrinfo hints, *peer;
-
-   memset(&hints, 0, sizeof(struct addrinfo));
-   hints.ai_flags = AI_PASSIVE;
-   hints.ai_family = AF_INET;
-   hints.ai_socktype = SOCK_DGRAM;
-
-   SRTSOCKET fhandle = srt_create_socket();
-   // SRT requires that third argument is always SOCK_DGRAM. The Stream API is set by an option,
-   // although there's also lots of other options to be set, for which there's a convenience option,
-   // SRTO_TRANSTYPE.
-   SRT_TRANSTYPE tt = SRTT_FILE;
-   srt_setsockopt(fhandle, 0, SRTO_TRANSTYPE, &tt, sizeof tt);
-
-   if (0 != getaddrinfo(argv[1], argv[2], &hints, &peer))
-   {
-      cout << "incorrect server/peer address. " << argv[1] << ":" << argv[2] << endl;
-      return -1;
-   }
-
-   // Connect to the server, implicit bind.
-   if (SRT_ERROR == srt_connect(fhandle, peer->ai_addr, peer->ai_addrlen))
-   {
-      cout << "connect: " << srt_getlasterror_str() << endl;
-      return -1;
-   }
-
-   freeaddrinfo(peer);
-
-   // Send name information of the requested file.
-   int len = strlen(argv[3]);
-
-   if (SRT_ERROR == srt_send(fhandle, (char*)&len, sizeof(int)))
-   {
-      cout << "send: " << srt_getlasterror_str() << endl;
-      return -1;
-   }
-
-   if (SRT_ERROR == srt_send(fhandle, argv[3], len))
-   {
-      cout << "send: " << srt_getlasterror_str() << endl;
-      return -1;
-   }
-
-   // Get size information.
-   int64_t size;
-
-   if (SRT_ERROR == srt_recv(fhandle, (char*)&size, sizeof(int64_t)))
-   {
-      cout << "send: " << srt_getlasterror_str() << endl;
-      return -1;
-   }
-
-   if (size < 0)
-   {
-      cout << "no such file " << argv[3] << " on the server\n";
-      return -1;
-   }
-
-   // Receive the file.
-   int64_t recvsize; 
-   int64_t offset = 0;
-
-   SRT_TRACEBSTATS trace;
-   srt_bstats(fhandle, &trace, true);
-
-   if (SRT_ERROR == (recvsize = srt_recvfile(fhandle, argv[4], &offset, size, SRT_DEFAULT_RECVFILE_BLOCK)))
-   {
-      cout << "recvfile: " << srt_getlasterror_str() << endl;
-      return -1;
-   }
-
-   srt_bstats(fhandle, &trace, true);
-
-   cout << "speed = " << trace.mbpsRecvRate << "Mbits/sec" << endl;
-   int losspercent = 100*trace.pktRcvLossTotal/trace.pktRecv;
-   cout << "loss = " << trace.pktRcvLossTotal << "pkt (" << losspercent << "%)\n";
-
-   srt_close(fhandle);
-
-   // Signal to the SRT library to clean up all allocated sockets and resources.
-   srt_cleanup();
-
-   return 0;
-}
-```
-
-</details>
-
-<details><summary>Here's my implentation of recvfile, it's not as complete,but it's a bit more concise</summary>
-
+### SRTKabuki is classy.
+* No matter what you're doing, you start with
 ```py3
+from srtkabuki import SRTKabuki
 
-        #!/usr/bin/env python3
+srtk = SRTKabuki(addr,port)
 
-        import sys
-        from srtkabuki import SRTKabuki
-
-        host = sys.argv[1]
-        port = sys.argv[2]
-        remote_file = sys.argv[3]
-        local_file = sys.argv[4]
-
-        srtk=SRTKabuki()
-        srtk.fetch(host,port,remote_file,local_file)
 ```
-
-</details>
- 
 ___
+### Examples 
+look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.
 
 # Here's where I'm at so far.
 
@@ -174,9 +42,11 @@ ___
 Help on class SRTKabuki in module srtkabuki:
 
 class SRTKabuki(builtins.object)
+ |  SRTKabuki(addr='0.0.0.0', port=9000)
+ |  
  |  Methods defined here:
  |  
- |  __init__(self)
+ |  __init__(self, addr='0.0.0.0', port=9000)
  |      Initialize self.  See help(type(self)) for accurate signature.
  |  
  |  accept(self)
@@ -188,26 +58,27 @@ class SRTKabuki(builtins.object)
  |  bytemsg(self, msg)
  |      bytemsg convert python byte string
  |      to a C string buffer
- |  
+ |
  |  cleanup(self)
  |      cleanup srt_cleanup
  |  
  |  close(self)
  |      close srt_close
  |  
- |  connect(self, host, port)
- |      connect srt_connect
+ |  connect(self)
+ |      connect connect to  host on port
  |  
  |  create_socket(self)
  |      create_socket srt_create_socket
+ |      and return it
  |  
- |  fetch(self, host, port, remote_file, local_file)
+ |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
- |
- | getlasterror(self)
- |      getlasterror srt_getlasterror
  |  
+ |  getlasterror(self)
+ |      getlasterror srt_getlasterror_str
+ |   
  |  ipv4int(self, addr)
  |      take a ipv4 string addr and make it an int
  |  
@@ -229,7 +100,7 @@ class SRTKabuki(builtins.object)
  |  recvfile(self, local_filename)
  |      recvfile srt_recvfile
  |  
- |  recvmsg(self)
+ |  recvmsg(self, msg_buffer)
  |      recvmsg srt_recvmsg
  |  
  |  request_file(self, remote_file)
@@ -249,6 +120,4 @@ class SRTKabuki(builtins.object)
  |  
  |  startup(self)
  |      startup  srt_startup()
- |  
 ```
-

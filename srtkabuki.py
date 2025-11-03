@@ -89,8 +89,10 @@ class SRTKabuki:
         self.libsrt = self.load_srt()
         self.startup()
         self.sock = self.create_socket()
+        self.peer_addr = None
+        self.peer_addr_size = None
         self.peer_sock = None
-        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr()
+        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr(self.sock,self.addr,self.port)
 
     def load_libc(self):
         """
@@ -125,21 +127,18 @@ class SRTKabuki:
         """
         accept srt_accept
         """
-        self.libsrt.srt_accept.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(sockaddr),
-            ctypes.POINTER(ctypes.c_int),
-        ]
+        ##        self.libsrt.srt_accept.argtypes = [
+        ##            ctypes.c_int,
+        ##            ctypes.POINTER(sockaddr),
+        ##            ctypes.POINTER(ctypes.c_int),
+        ##        ]
         self.libsrt.srt_accept.restype = ctypes.c_int
-        their_addr = sockaddr_storage()
-        addr_size = ctypes.c_int(ctypes.sizeof(their_addr))
+        self.peer_addr = sockaddr_storage()
+        self.peer_addr_size = ctypes.c_int(ctypes.sizeof(self.peer_addr))
         self.peer_sock = self.libsrt.srt_accept(
-            self.sock, ctypes.byref(their_addr), ctypes.byref(addr_size)
+            self.sock, ctypes.byref(self.peer_addr), ctypes.byref(self.peer_addr_size)
         )
         self.getlasterror()
-        if self.peer_sock == SRT_INVALID_SOCK:
-            self._close()
-            self.cleanup()
 
     def bind(self):
         """
@@ -166,27 +165,27 @@ class SRTKabuki:
         self.libsrt.srt_close(self.sock)
         self.getlasterror()
 
-    def connect(self, host, port):
+    def connect(self, sock,addr, port):
         """
         connect connect to  host on port
         """
         hints = addrinfo(ai_family=AF_INET, ai_socktype=SOCK_DGRAM)
-        peer = ctypes.POINTER(addrinfo)()
+        target = ctypes.POINTER(addrinfo)()
         if (
             self.getaddrinfo(
-                host.encode("utf-8"),
+                addr.encode("utf-8"),
                 port.encode("utf-8"),
                 ctypes.byref(hints),
-                ctypes.byref(peer),
+                ctypes.byref(target),
             )
             != 0
         ):
             print(f"getaddrinfo failed for {server_ip}:{server_port}", file=sys.stderr)
             return -1
         self.libsrt.srt_connect(
-            self.sock, peer.contents.ai_addr, peer.contents.ai_addrlen
+            sock, target.contents.ai_addr, target.contents.ai_addrlen
         )
-        self.freeaddrinfo(peer)
+        self.freeaddrinfo(target)
         self.getlasterror()
 
     def create_socket(self):
@@ -249,12 +248,16 @@ class SRTKabuki:
         )
         self.getlasterror()
 
-    def recvmsg(self):
+    def recvmsg(self, msg_buffer):
         """
         recvmsg srt_recvmsg
         """
         self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         self.libsrt.srt_recvmsg.restype = ctypes.c_int
+        st = self.libsrt.srt_recvmsg(
+            self.peer_sock, msg_buffer, ctypes.sizeof(msg_buffer)
+        )
+        return st
 
     def send(self, msg):
         """
@@ -311,14 +314,14 @@ class SRTKabuki:
         sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
         return sa
 
-    def mk_sockaddr_ptr(self):
+    def mk_sockaddr_ptr(self, sock,addr,port):
         """
         mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
         """
         sa_in = sockaddr_in()
         sa_in.sin_family = socket.AF_INET
-        sa_in.sin_port = socket.htons(self.port)
-        sa_in.sin_addr.s_addr = self.ipv4int(self.addr)
+        sa_in.sin_port = socket.htons(port)
+        sa_in.sin_addr.s_addr = self.ipv4int(addr)
         # socket.inet_pton(socket.AF_INET, addr)
         # Get a pointer to sa_in
         sa_in_ptr = ctypes.pointer(sa_in)
@@ -357,7 +360,7 @@ class SRTKabuki:
         """
         yes = ctypes.c_int(1)
         self.setsockflag(SRTO_TRANSTYPE, yes)
-        self.connect(host, port)
+        self.connect(self.sock,host, port)
         self.request_file(remote_file)
         self.recvfile(local_file)
         self.close()

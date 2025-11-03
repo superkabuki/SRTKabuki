@@ -41,7 +41,7 @@ look in the examples directory to see the original c/c++ examples and the rewrit
 ___
 # Here's where I'm at so far.
 
-```py3
+```php
 Help on class SRTKabuki in module srtkabuki:
 
 class SRTKabuki(builtins.object)
@@ -61,7 +61,7 @@ class SRTKabuki(builtins.object)
  |  bytemsg(self, msg)
  |      bytemsg convert python byte string
  |      to a C string buffer
- |
+ |  
  |  cleanup(self)
  |      cleanup srt_cleanup
  |  
@@ -69,19 +69,20 @@ class SRTKabuki(builtins.object)
  |      close srt_close
  |  
  |  connect(self)
- |      connect connect to  host on port
+ |      connect srt_connect
  |  
  |  create_socket(self)
  |      create_socket srt_create_socket
- |      and return it
  |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
+ |      
+ |      all args are strings.
  |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
- |   
+ |  
  |  ipv4int(self, addr)
  |      take a ipv4 string addr and make it an int
  |  
@@ -113,14 +114,14 @@ class SRTKabuki(builtins.object)
  |      send srt_send
  |  
  |  sendmsg2(self, msg)
- |      sendmsg2 format byte string for C
- |      and write it to the socket
+ |      sendmsg2 srt_sendmsg2
  |  
  |  setsockflag(self, flag, val)
- |      setsockflag  setsockflag
+ |      setsockflag  srt_setsockflag
  |      the flag is one from statiic.SRT_SOCKOPTS
  |      flag is set to val
  |  
  |  startup(self)
- |      startup  srt_startup()
+ |      startup  srt_startup
+ |  
 ```

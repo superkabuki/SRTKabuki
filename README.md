@@ -4,17 +4,25 @@
 ### My goal here is to be able to use the SRT protocol in python 
 and to do so with just a few lines of code.
 <BR> 
+___
+### SRTKabuki is classy.
+* SRTKabuki is a python class that implements SRT. <BR>
+* No matter what you're doing, you start with
+```py3
+from srtkabuki import SRTKabuki
 
-### SRTKabuki is a python class that implements SRT. <BR>
+srtk = SRTKabuki(addr,port)
 
-I've just started writing SRTKabuki it's not complete, <BR>
-A lot of the base functionality has already been implemented though.<br>
+```
+* method names map to srt_function names _(ex. SRTKabuki.connect is libsrt.srt_connect)_
+
+___
 
 ###  Get invovled or go away.
+__If you use open source, contribute to open source.__<BR>
 
 If you are interested in using SRT from python, come work on it with me..<BR>
 You don't need to be a master of python, there's stuff to do besides just writing code.<BR>
-If you're interested in or know SRT, come on and give me a hand so we can do it much faster.
 
 ___
 
@@ -24,14 +32,7 @@ ___
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed
 ___
 
-### SRTKabuki is classy.
-* No matter what you're doing, you start with
-```py3
-from srtkabuki import SRTKabuki
 
-srtk = SRTKabuki(addr,port)
-
-```
 ___
 ### Examples 
 look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.

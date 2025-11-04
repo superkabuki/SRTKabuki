@@ -89,6 +89,7 @@ class SRTKabuki:
         self.peer_addr = None
         self.peer_addr_size = None
         self.peer_sock = None
+        self.eid=None
 
     def load_libc(self):
         """
@@ -172,6 +173,21 @@ class SRTKabuki:
         self.getlasterror()
         return ss
 
+    def epoll_create(self):
+        """
+        epoll_create srt_epoll_create
+        """
+        self.eid = self.libsrt.srt_epoll.create()
+        self.grtlasterror()
+
+    def epoll_add_usock(self, events):
+        """
+        epoll_add_usock srt_epoll_add_usock    
+        """
+        self.libsrt.srt_epoll_add_usock(self.eid, self.sock, ctypes.byref(events))
+        self.getlasterror()
+
+
     def getlasterror(self):
         """
         getlasterror srt_getlasterror_str
@@ -182,6 +198,12 @@ class SRTKabuki:
         print(
             f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}", file=sys.stderr
         )
+
+    def getsockstate(self)"
+        """
+        getsockstate srt_getsockstate 
+        """
+            self.libsrt.srt_getsockstate(self.sock)
 
     def listen(self):
         """

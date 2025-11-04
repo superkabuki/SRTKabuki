@@ -199,7 +199,7 @@ class SRTKabuki:
             f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}", file=sys.stderr
         )
 
-    def getsockstate(self)"
+    def getsockstate(self):
         """
         getsockstate srt_getsockstate 
         """

@@ -203,7 +203,7 @@ class SRTKabuki:
         """
         getsockstate srt_getsockstate 
         """
-            self.libsrt.srt_getsockstate(self.sock)
+        self.libsrt.srt_getsockstate(self.sock)
 
     def listen(self):
         """

@@ -7,7 +7,7 @@ import sys
 import time
 import ctypes
 from srtkabuki import SRTKabuki
-from static import SRTO_SENDER
+from sockopts import SRTO_SENDER
 
 
 def main():

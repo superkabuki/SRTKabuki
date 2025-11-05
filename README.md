@@ -4,7 +4,6 @@
 ### My goal here is to be able to use the SRT protocol in python 
 and to do so with just a few lines of code.
 <BR> 
-It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..
 ___
 ### SRTKabuki is classy.
 * SRTKabuki is a python class that implements SRT. <BR>
@@ -30,7 +29,8 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### NEWS
-* 11/05/2025 : started on epoll stuff. it's really started coming together, a couple more weeks to a release I think.
+* 11/05/2025 : It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..
+* 11/04/2025 : started on epoll stuff. it's really started coming together, a couple more weeks to a release I think.
 * 11/01/2025 :  rewrote examples test-c-server.c and test-c-client.c, using SRTKabuki and they both work. 
 * 10/30/2025 :  __Today I got basic downloading files over a network using SRT working__,cleaning up code for a new commit. 
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed

@@ -11,7 +11,7 @@ import socket
 import inspect
 
 
-from static import SRT_DEFAULT_RECVFILE_BLOCK, SRT_ERROR
+from static import SRT_DEFAULT_RECVFILE_BLOCK
 from sockopts import SRTO_TRANSTYPE
 
 # Socket Address structures
@@ -74,7 +74,9 @@ class sockaddr_storage(ctypes.Structure):
 
 
 class SRTKabuki:
-
+    """
+    SRTKabuki Pythonic Secure Reliable Transport 
+    """
     def __init__(self, addr="0.0.0.0", port=9000):
         self.addr = addr
         self.port = port
@@ -157,7 +159,7 @@ class SRTKabuki:
 
     def connect(self):
         """
-        connect connect to  host on port
+        connect srt_connect
         """
         self.libsrt.srt_connect(self.sock, self.sa_ptr, self.sa_size)
         self.getlasterror()
@@ -177,7 +179,7 @@ class SRTKabuki:
         epoll_create srt_epoll_create
         """
         self.eid = self.libsrt.srt_epoll.create()
-        self.grtlasterror()
+        self.getlasterror()
 
     def epoll_add_usock(self, events):
         """
@@ -261,8 +263,7 @@ class SRTKabuki:
 
     def sendmsg2(self, msg):
         """
-        sendmsg2 format byte string for C
-        and write it to the socket
+        sendmsg2 srt_sendmsg2
         """
         msg = self.bytemsg(msg)
         st = self.libsrt.srt_sendmsg2(self.sock, msg, ctypes.sizeof(msg), None)
@@ -271,9 +272,8 @@ class SRTKabuki:
 
     def setsockflag(self, flag, val):
         """
-        setsockflag  setsockflag
-        the flag is one from statiic.SRT_SOCKOPTS
-        flag is set to val
+        setsockflag  srt_setsockflag
+    
         """
         val = ctypes.c_int(val)
         self.libsrt.srt_setsockflag(

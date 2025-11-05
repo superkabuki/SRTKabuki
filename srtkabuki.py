@@ -84,7 +84,7 @@ class SRTKabuki:
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
-        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr()
+        self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr(self.addr,self.port)
         self.sock = self.create_socket()
         self.peer_addr = None
         self.peer_addr_size = None
@@ -130,6 +130,8 @@ class SRTKabuki:
             self.sock, ctypes.byref(self.peer_addr), ctypes.byref(self.peer_addr_size)
         )
         self.getlasterror()
+        return self.peer_sock
+
 
     def bind(self):
         """
@@ -182,7 +184,7 @@ class SRTKabuki:
 
     def epoll_add_usock(self, events):
         """
-        epoll_add_usock srt_epoll_add_usock    
+        epoll_add_usock srt_epoll_add_usock
         """
         self.libsrt.srt_epoll_add_usock(self.eid, self.sock, ctypes.byref(events))
         self.getlasterror()
@@ -201,9 +203,10 @@ class SRTKabuki:
 
     def getsockstate(self):
         """
-        getsockstate srt_getsockstate 
+        getsockstate srt_getsockstate
         """
         self.libsrt.srt_getsockstate(self.sock)
+        self.getlasterror()
 
     def listen(self):
         """
@@ -298,14 +301,14 @@ class SRTKabuki:
         self.getlasterror()
         return sa
 
-    def mk_sockaddr_ptr(self):
+    def mk_sockaddr_ptr(self,addr,port):
         """
         mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
         """
         sa_in = sockaddr_in()
         sa_in.sin_family = socket.AF_INET
-        sa_in.sin_port = socket.htons(self.port)
-        sa_in.sin_addr.s_addr = self.ipv4int(self.addr)
+        sa_in.sin_port = socket.htons(port)
+        sa_in.sin_addr.s_addr = self.ipv4int(addr)
         # Get a pointer to sa_in
         sa_in_ptr = ctypes.pointer(sa_in)
         #  (struct sockaddr*)&sa

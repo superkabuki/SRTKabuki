@@ -2,11 +2,10 @@
 This is SRTKabuki version of examples/test-c-server.c in libsrt.
 https://github.com/Haivision/srt/blob/master/examples/test-c-server.c
 '''
-
 import ctypes
 import sys
 from srtkabuki import SRTKabuki
-from static import SRTO_RCVSYN
+from sockopts import SRTO_RCVSYN
 
 
 def main():
@@ -18,6 +17,7 @@ def main():
     yes = 1
     srtk.setsockflag(SRTO_RCVSYN, yes)
     srtk.bind()
+    print(srtk.getsockstate())
     srtk.listen()
     srtk.accept()
     print("Accepted connection. Waiting for messages...")

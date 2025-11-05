@@ -70,19 +70,26 @@ class SRTKabuki(builtins.object)
  |      close srt_close
  |  
  |  connect(self)
- |      connect srt_connect
+ |      connect connect to  host on port
  |  
  |  create_socket(self)
  |      create_socket srt_create_socket
  |  
+ |  epoll_add_usock(self, events)
+ |      epoll_add_usock srt_epoll_add_usock
+ |  
+ |  epoll_create(self)
+ |      epoll_create srt_epoll_create
+ |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
- |      
- |      all args are strings.
  |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
+ |  
+ |  getsockstate(self)
+ |      getsockstate srt_getsockstate
  |  
  |  ipv4int(self, addr)
  |      take a ipv4 string addr and make it an int
@@ -96,7 +103,7 @@ class SRTKabuki(builtins.object)
  |  load_srt(self)
  |      load_srt load everything from libsrt.so
  |  
- |  mk_sockaddr_ptr(self)
+ |  mk_sockaddr_ptr(self, addr, port)
  |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
  |  
  |  recv(self)
@@ -118,11 +125,10 @@ class SRTKabuki(builtins.object)
  |      sendmsg2 srt_sendmsg2
  |  
  |  setsockflag(self, flag, val)
- |      setsockflag  srt_setsockflag
- |      the flag is one from statiic.SRT_SOCKOPTS
- |      flag is set to val
+ |      setsockflag  setsockflag
+ |      the flag is one from ssockopts.py
  |  
  |  startup(self)
- |      startup  srt_startup
+ |      startup  srt_startup()
  |  
 ```

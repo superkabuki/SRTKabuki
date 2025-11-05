@@ -11,11 +11,8 @@ import socket
 import inspect
 
 
-from static import (
-    SRT_DEFAULT_RECVFILE_BLOCK,
-    SRTO_TRANSTYPE,
-    SRT_ERROR,
-)
+from static import SRT_DEFAULT_RECVFILE_BLOCK, SRT_ERROR
+from sockopts import SRTO_TRANSTYPE
 
 # Socket Address structures
 

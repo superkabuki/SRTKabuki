@@ -42,7 +42,7 @@ look in the examples directory to see the original c/c++ examples and the rewrit
 ___
 # Here's where I'm at so far.
 
-```php
+```py3
 Help on class SRTKabuki in module srtkabuki:
 
 class SRTKabuki(builtins.object)

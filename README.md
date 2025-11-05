@@ -4,6 +4,7 @@
 ### My goal here is to be able to use the SRT protocol in python 
 and to do so with just a few lines of code.
 <BR> 
+It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..
 ___
 ### SRTKabuki is classy.
 * SRTKabuki is a python class that implements SRT. <BR>

@@ -19,11 +19,11 @@ def main():
     srtk.bind()
     print(srtk.getsockstate())
     srtk.listen()
-    srtk.accept()
+    fhandle =srtk.accept()
     print("Accepted connection. Waiting for messages...")
     msg_buffer = ctypes.create_string_buffer(1316)
     while True:
-        st = srtk.recvmsg(msg_buffer)
+        st = srtk.recvmsg(msg_buffer,fhandle)
         if st == -1:
             print("minus one")
             break

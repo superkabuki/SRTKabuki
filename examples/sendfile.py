@@ -1,6 +1,7 @@
 import ctypes
 import sys
 import os
+import time
 import socket
 from ctypes.util import find_library
 from srtkabuki import SRTKabuki
@@ -14,15 +15,13 @@ yes = 1
 srtk.setsockflag(SRTO_TRANSTYPE, yes)
 srtk.bind()
 srtk.listen()
+# Accept multiple client connections (infinite loop simulation)
 print("Waiting for connections...")
+
 while True:
-    fhandle = srtk.accept()  # serv, client_sa_ptr, ctypes.pointer(addrlen_int))
-    if fhandle == SRT_INVALID_SOCK:
-        print(f"Accept error: {srt.srt_getlasterror_str().decode('utf-8')}")
-        break
+    fhandle = srtk.accept() 
     print(f"Accepted new connection (socket ID: {fhandle})...")
-    buffer_size = 1024
-    # buffer = ctypes.create_string_buffer(buffer_size)
+    buffer_size = 8
     data = srtk.recv(
         buffer_size,
         fhandle,
@@ -37,6 +36,7 @@ while True:
     print(filename)
     srtk.getlasterror()
     srtk.sendfile(filename, fhandle)
+    time.sleep(1)
     srtk.close(fhandle)
     srtk.getlasterror()
 

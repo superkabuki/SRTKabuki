@@ -170,6 +170,7 @@ class SRTKabuki:
     def create_socket(self):
         """
         create_socket srt_create_socket
+
         """
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
@@ -218,8 +219,9 @@ class SRTKabuki:
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
+        out= f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace("Success","✓")
         print(
-            f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}", file=sys.stderr
+            out, file=sys.stderr
         )
 
     def getsockstate(self, sock=None):
@@ -238,12 +240,12 @@ class SRTKabuki:
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
 
-    def recv(self, buffer_size=4, sock=None):
+    def recv(self, buffsize=1316, sock=None):
         """
         recv srt_recv
         """
         sock = self.chk_sock(sock)
-        buffer = ctypes.create_string_buffer(buffer_size)
+        buffer = ctypes.create_string_buffer(buffsize)
         self.libsrt.srt_recv(sock, buffer, ctypes.sizeof(buffer))
         self.getlasterror()
         return buffer.value
@@ -254,11 +256,11 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         filesize = self.recv(sock=sock)
-        offset_val = ctypes.c_int64(0)
+        offset = ctypes.c_int64(0)
         recvd_size = self.libsrt.srt_recvfile(
             sock,
             local_filename.encode("utf-8"),
-            ctypes.byref(offset_val),
+            ctypes.byref(offset),
             filesize,
             SRT_DEFAULT_RECVFILE_BLOCK,
         )
@@ -271,11 +273,11 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         filesize = ctypes.c_int64(os.path.getsize(filename))
-        offset_val = ctypes.c_int64(0)
+        offset = ctypes.c_int64(0)
         self.libsrt.srt_sendfile(
             sock,
             filename,
-            ctypes.byref(offset_val),
+            ctypes.byref(offset),
             filesize,
             SRT_DEFAULT_RECVFILE_BLOCK,
         )
@@ -287,9 +289,8 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        #  self.libsrt.srt_recvmsg.restype = ctypes.c_int
         st = self.libsrt.srt_recvmsg(
-            self.peer_sock, msg_buffer, ctypes.sizeof(msg_buffer)
+        sock, msg_buffer, ctypes.sizeof(msg_buffer)
         )
         self.getlasterror()
         return st

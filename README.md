@@ -49,6 +49,8 @@ Help on class SRTKabuki in module srtkabuki:
 class SRTKabuki(builtins.object)
  |  SRTKabuki(addr='0.0.0.0', port=9000)
  |  
+ |  SRTKabuki Pythonic Secure Reliable Transport
+ |  
  |  Methods defined here:
  |  
  |  __init__(self, addr='0.0.0.0', port=9000)
@@ -64,14 +66,17 @@ class SRTKabuki(builtins.object)
  |      bytemsg convert python byte string
  |      to a C string buffer
  |  
+ |  chk_sock(self, sock)
+ |      chk_sock if we don't have a sock, use self.sock
+ |  
  |  cleanup(self)
  |      cleanup srt_cleanup
  |  
- |  close(self)
+ |  close(self, sock=None)
  |      close srt_close
  |  
  |  connect(self)
- |      connect connect to  host on port
+ |      connect srt_connect
  |  
  |  create_socket(self)
  |      create_socket srt_create_socket
@@ -82,14 +87,19 @@ class SRTKabuki(builtins.object)
  |  epoll_create(self)
  |      epoll_create srt_epoll_create
  |  
+ |  epoll_wait(self, readfds, writefds, ms_timeout, lrds, lwrds)
+ |      epoll_wait srt_epoll_wait
+ |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
+ |      
+ |      all args are strings.
  |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
  |  
- |  getsockstate(self)
+ |  getsockstate(self, sock=None)
  |      getsockstate srt_getsockstate
  |  
  |  ipv4int(self, addr)
@@ -107,29 +117,32 @@ class SRTKabuki(builtins.object)
  |  mk_sockaddr_ptr(self, addr, port)
  |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
  |  
- |  recv(self)
+ |  recv(self, buffer_size=4, sock=None)
  |      recv srt_recv
  |  
- |  recvfile(self, local_filename)
+ |  recvfile(self, local_filename, sock=None)
  |      recvfile srt_recvfile
  |  
- |  recvmsg(self, msg_buffer)
+ |  recvmsg(self, msg_buffer, sock=None)
  |      recvmsg srt_recvmsg
  |  
  |  request_file(self, remote_file)
  |      request_file request a file from a server
  |  
- |  send(self, msg)
+ |  send(self, msg, sock=None)
  |      send srt_send
  |  
- |  sendmsg2(self, msg)
+ |  sendfile(self, filename, sock=None)
+ |      sendfile srt_sendfile
+ |  
+ |  sendmsg2(self, msg, sock=None)
  |      sendmsg2 srt_sendmsg2
  |  
  |  setsockflag(self, flag, val)
- |      setsockflag  setsockflag
- |      the flag is one from ssockopts.py
+ |      setsockflag  srt_setsockflag
  |  
  |  startup(self)
  |      startup  srt_startup()
  |  
+
 ```

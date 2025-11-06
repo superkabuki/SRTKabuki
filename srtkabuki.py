@@ -91,8 +91,7 @@ class SRTKabuki:
         self.peer_addr_size = None
         self.peer_sock = None
         self.eid = None
-        self.readfds = (ctypes.c_int * 100)()
-        self.writefds = (ctypes.c_int * 100)()
+
 
     def load_libc(self):
         """
@@ -171,7 +170,6 @@ class SRTKabuki:
     def create_socket(self):
         """
         create_socket srt_create_socket
-
         """
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
@@ -192,15 +190,14 @@ class SRTKabuki:
         self.libsrt.srt_epoll_add_usock(self.eid, self.sock, ctypes.byref(events))
         self.getlasterror()
 
-    # srt_epoll_wait(epid, &srtrfds[0], &srtrfdslen, 0, 0, 100, 0, 0, 0, 0);
-    # int srt_epoll_wait(int eid, SRTSOCKET* readfds, int* rnum, SRTSOCKET* writefds, int* wnum,
-    # int64_t msTimeOut,
-    #  SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
     def epoll_wait(self, readfds, writefds, ms_timeout, lrds, lwrds):
         """
         epoll_wait srt_epoll_wait
-
         """
+        # srt_epoll_wait(epid, &srtrfds[0], &srtrfdslen, 0, 0, 100, 0, 0, 0, 0);
+        # int srt_epoll_wait(int eid, SRTSOCKET* readfds, int* rnum, SRTSOCKET* writefds, int* wnum,
+        # int64_t msTimeOut,
+        #  SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
         self.libsrt.srt_epoll_wait(
             ctypes.byref(readfds),
             ctypes.byref(len(readfds)),

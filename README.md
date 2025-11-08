@@ -29,6 +29,7 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### NEWS
+* 11/08/2025 : __Boom goes the dynamite, reading srt output from srt-live-transmit now works.__
 * 11/05/2025 : It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..
 * 11/04/2025 : started on epoll stuff. it's really started coming together, a couple more weeks to a release I think.
 * 11/01/2025 :  rewrote examples test-c-server.c and test-c-client.c, using SRTKabuki and they both work. 
@@ -38,9 +39,24 @@ ___
 
 
 
-### Examples 
+### Examples
+* The smoketest from the libsrt docs.
+* In a terminal window run
+```sh
+ffmpeg -f lavfi -re -i smptebars=duration=300:size=1280x720:rate=30\
+-f lavfi -re -i sine=frequency=1000:duration=60:sample_rate=44100\
+-pix_fmt yuv420p -c:v libx264 -b:v 1000k -g 30 -keyint_min 120\
+-profile:v baseline -preset veryfast -f mpegts "udp://127.0.0.1:1234?pkt_size=1316"
+```
+* In another terminal run
+```sh
+srt-live-transmit udp://127.0.0.1:1234 srt://:4201 
+```
+* 
 look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.
 ___
+
+
 # Here's where I'm at so far.
 
 ```py3

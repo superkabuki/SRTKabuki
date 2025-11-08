@@ -89,13 +89,13 @@ ___
 Help on class SRTKabuki in module srtkabuki:
 
 class SRTKabuki(builtins.object)
- |  SRTKabuki(addr='0.0.0.0', port=9000)
+ |  SRTKabuki(srturl)
  |  
  |  SRTKabuki Pythonic Secure Reliable Transport
  |  
  |  Methods defined here:
  |  
- |  __init__(self, addr='0.0.0.0', port=9000)
+ |  __init__(self, srturl)
  |      Initialize self.  See help(type(self)) for accurate signature.
  |  
  |  accept(self)
@@ -159,13 +159,16 @@ class SRTKabuki(builtins.object)
  |  mk_sockaddr_ptr(self, addr, port)
  |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
  |  
- |  recv(self, buffer_size=4, sock=None)
+ |  mkbuff(self, buffsize)
+ |      mkbuff make a c function compatible buffer
+ |  
+ |  recv(self, buffer)
  |      recv srt_recv
  |  
  |  recvfile(self, local_filename, sock=None)
  |      recvfile srt_recvfile
  |  
- |  recvmsg(self, msg_buffer, sock=None)
+ |  recvmsg(self, buffer, sock=None)
  |      recvmsg srt_recvmsg
  |  
  |  request_file(self, remote_file)
@@ -182,9 +185,15 @@ class SRTKabuki(builtins.object)
  |  
  |  setsockflag(self, flag, val)
  |      setsockflag  srt_setsockflag
- |  
+ |
  |  startup(self)
  |      startup  srt_startup()
  |  
-
+ |  ----------------------------------------------------------------------
+ |  Static methods defined here:
+ |  
+ |  split_url(url)
+ |      split_url, split srt url into addr,port, path and args
+ |  
+ |  ----------------------------------------------------------------------
 ```

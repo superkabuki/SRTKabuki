@@ -248,7 +248,7 @@ class SRTKabuki:
         buffer = ctypes.create_string_buffer(buffsize)
         self.libsrt.srt_recv(sock, buffer, ctypes.sizeof(buffer))
         self.getlasterror()
-        return buffer.value
+        return buffer.raw
 
     def recvfile(self, local_filename, sock=None):
         """
@@ -267,6 +267,28 @@ class SRTKabuki:
         self.getlasterror()
         return recvd_size
 
+
+    def recvmsg(self, buffsize=1316,sock=None):
+        """
+        recvmsg srt_recvmsg
+        """
+        sock = self.chk_sock(sock)
+        buffer = ctypes.create_string_buffer(buffsize)
+     #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+        st = self.libsrt.srt_recvmsg(
+        sock, buffer, len(buffer)
+        )
+      #  self.getlasterror()
+        return buffer.raw
+
+    def send(self, msg, sock=None):
+        """
+        send srt_send
+        """
+        sock = self.chk_sock(sock)
+        self.libsrt.srt_send(sock, msg, 64)
+        self.getlasterror()
+
     def sendfile(self, filename, sock=None):
         """
         sendfile srt_sendfile
@@ -283,33 +305,14 @@ class SRTKabuki:
         )
         self.getlasterror()
 
-    def recvmsg(self, msg_buffer,sock=None):
-        """
-        recvmsg srt_recvmsg
-        """
-        sock = self.chk_sock(sock)
-        self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        st = self.libsrt.srt_recvmsg(
-        sock, msg_buffer, ctypes.sizeof(msg_buffer)
-        )
-        self.getlasterror()
-        return st
-
-    def send(self, msg, sock=None):
-        """
-        send srt_send
-        """
-        sock = self.chk_sock(sock)
-        self.libsrt.srt_send(sock, msg, ctypes.sizeof(msg))
-        self.getlasterror()
 
     def sendmsg2(self, msg, sock=None):
         """
         sendmsg2 srt_sendmsg2
         """
         sock = self.chk_sock(sock)
-        msg = self.bytemsg(msg)
-        st = self.libsrt.srt_sendmsg2(sock, msg, ctypes.sizeof(msg), None)
+     #   msg = self.bytemsg(msg)
+        st = self.libsrt.srt_sendmsg2(sock, msg, 32, None)
         self.getlasterror()
         time.sleep(0.001)
 
@@ -320,8 +323,7 @@ class SRTKabuki:
         """
         val = ctypes.c_int(val)
         self.libsrt.srt_setsockflag(
-            self.sock, flag, ctypes.byref(val), ctypes.sizeof(val)
-        )
+            self.sock, flag, ctypes.byref(val), ctypes.sizeof(ctypes.c_int64))
         self.getlasterror()
 
     def startup(self):
@@ -359,6 +361,10 @@ class SRTKabuki:
         bytemsg convert python byte string
         to a C string buffer
         """
+        if not isinstance(msg,(bytes,str)):
+            msg = str(msg)
+        if isinstance(msg,str):
+            msg = msg.encode("utf8")
         if not isinstance(msg, bytes):
             msg = b"Message needs to be bytes"
         return ctypes.create_string_buffer(msg, len(msg))

@@ -41,18 +41,44 @@ ___
 
 ### Examples
 * The smoketest from the libsrt docs.
+* Install libsrt https://github.com/Haivision/srt
+* create the file livekabuki.py
+```py3
+#!/usr/bin/env python3
+
+import sys
+from  srtkabuki import SRTKabuki
+
+
+kabuki = SRTKabuki(sys.argv[1])
+kabuki.connect()
+buffsize=1316
+buffer = kabuki.mkbuff(buffsize)
+while True:
+    st = kabuki.recvmsg(buffer)
+    sys.stdout.buffer.write(buffer.raw)
+```
+
 * In a terminal window run
-```sh
+
+```js
 ffmpeg -f lavfi -re -i smptebars=duration=300:size=1280x720:rate=30\
 -f lavfi -re -i sine=frequency=1000:duration=60:sample_rate=44100\
 -pix_fmt yuv420p -c:v libx264 -b:v 1000k -g 30 -keyint_min 120\
 -profile:v baseline -preset veryfast -f mpegts "udp://127.0.0.1:1234?pkt_size=1316"
 ```
+
 * In another terminal run
-```sh
+
+```awk
 srt-live-transmit udp://127.0.0.1:1234 srt://:4201 
 ```
-* 
+* In yet another window run
+
+```sed
+python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
+```
+
 look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.
 ___
 

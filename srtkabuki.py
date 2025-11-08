@@ -79,9 +79,8 @@ class SRTKabuki:
     SRTKabuki Pythonic Secure Reliable Transport
     """
 
-    def __init__(self, addr="0.0.0.0", port=9000):
-        self.addr = addr
-        self.port = port
+    def __init__(self, srturl):
+        self.addr,self.port,self.path, self.args=self.split_url(srturl)
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
@@ -92,6 +91,19 @@ class SRTKabuki:
         self.peer_sock = None
         self.eid = None
 
+    @staticmethod
+    def split_url(url):
+        """
+        split_url, split srt url into addr,port, path and args
+        """
+        addr=port=path=args =None
+        url = url.replace('srt://','')
+        if '?' in url:
+            url, args=url.split('?')
+        if '/' in url:
+            url,path = url.split('/',1)
+        addr,port = url.split(':',1)
+        return addr,int(port),path,args
 
     def load_libc(self):
         """

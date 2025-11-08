@@ -128,7 +128,7 @@ class SRTKabuki:
         load_srt load everything from libsrt.so
         """
         libsrt = None
-        libsrt = ctypes.CDLL("libsrt.so")
+        libsrt = ctypes.CDLL(ctypes.util.find_library("libsrt.so"))
         if not libsrt:
             raise OSError("failed to load libsrt.so")
         return libsrt

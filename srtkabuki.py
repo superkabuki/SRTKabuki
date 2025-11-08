@@ -240,15 +240,17 @@ class SRTKabuki:
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
 
-    def recv(self, buffsize=1316, sock=None):
+    def recv(self, buffer):
         """
         recv srt_recv
         """
         sock = self.chk_sock(sock)
-        buffer = ctypes.create_string_buffer(buffsize)
-        self.libsrt.srt_recv(sock, buffer, ctypes.sizeof(buffer))
-        self.getlasterror()
-        return buffer.raw
+     #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+        st = self.libsrt.srt_recv(
+        sock, buffer, len(buffer)
+        )
+      #  self.getlasterror()
+        return st
 
     def recvfile(self, local_filename, sock=None):
         """
@@ -267,19 +269,23 @@ class SRTKabuki:
         self.getlasterror()
         return recvd_size
 
+    def mkbuff(self, buffsize):
+        """
+        mkbuff make a c function compatible buffer
+        """
+        return  ctypes.create_string_buffer(buffsize)
 
-    def recvmsg(self, buffsize=1316,sock=None):
+    def recvmsg(self, buffer,sock=None):
         """
         recvmsg srt_recvmsg
         """
         sock = self.chk_sock(sock)
-        buffer = ctypes.create_string_buffer(buffsize)
      #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         st = self.libsrt.srt_recvmsg(
         sock, buffer, len(buffer)
         )
       #  self.getlasterror()
-        return buffer.raw
+        return st
 
     def send(self, msg, sock=None):
         """

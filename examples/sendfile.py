@@ -18,13 +18,14 @@ def send_a_file(srtk):
     """
     fhandle = srtk.accept() 
     print(f"Accepted new connection (socket ID: {fhandle})...")
-    buffer_size = 8
-    data = srtk.recv(buffer_size,fhandle)
-    filenamesize = int(data)
+    smallbuff=srtk.mkbuff(8)
+    srtk.recv(smallbuff,fhandle)
+    filenamesize = int(smallbuff)
     print(filenamesize)
-    filename = srtk.recv(filenamesize,fhandle)
-    print(filename)
-    srtk.sendfile(filename, fhandle)
+    filename =srtk.mkbuff(filenamesize)
+    srtk.recv(filename,fhandle)
+    print(filename.raw)
+    srtk.sendfile(filename.raw, fhandle)
     time.sleep(1)
     srtk.close(fhandle)
    
@@ -36,7 +37,7 @@ def go():
     bind it to 0.0.0.0 port 9000,
     accept connections
     """
-    srtk = SRTKabuki("0.0.0.0", 9000)
+    srtk = SRTKabuki('srt://0.0.0.0:9000')
     yes = 1
     srtk.setsockflag(SRTO_TRANSTYPE, yes)
     srtk.bind()

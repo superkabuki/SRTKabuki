@@ -5,13 +5,13 @@ https://github.com/Haivision/srt/blob/master/examples/test-c-client.c
 
 import sys
 import time
-import ctypes
 from srtkabuki import SRTKabuki
 from sockopts import SRTO_SENDER
 
 
 def main():
-    srtk = SRTKabuki(addr=sys.argv[1], port=int(sys.argv[2]))
+    srt_url = sys.argv[1] # srt://example.com:9000
+    srtk = SRTKabuki(srt_url)
     srtk.setsockflag(SRTO_SENDER, 1)
     srtk.connect()
     a = 100

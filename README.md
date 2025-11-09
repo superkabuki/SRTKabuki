@@ -87,11 +87,6 @@ ___
 
 ```py3
 Help on class SRTKabuki in module srtkabuki:
-
-class SRTKabuki(builtins.object)
- |  SRTKabuki(srturl)
- |  
- |  SRTKabuki Pythonic Secure Reliable Transport
  |  
  |  Methods defined here:
  |  
@@ -134,9 +129,7 @@ class SRTKabuki(builtins.object)
  |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
- |      and save it as local_file
- |      
- |      all args are strings.
+ |      and save it as local_file     
  |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
@@ -185,7 +178,7 @@ class SRTKabuki(builtins.object)
  |  
  |  setsockflag(self, flag, val)
  |      setsockflag  srt_setsockflag
- |
+ |  
  |  startup(self)
  |      startup  srt_startup()
  |  
@@ -195,5 +188,5 @@ class SRTKabuki(builtins.object)
  |  split_url(url)
  |      split_url, split srt url into addr,port, path and args
  |  
- |  ----------------------------------------------------------------------
+
 ```

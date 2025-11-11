@@ -11,7 +11,7 @@ ___
 ```py3
 from srtkabuki import SRTKabuki
 
-srtk = SRTKabuki(addr,port)
+srtk = SRTKabuki(srt_url) # srt://1.2.3.4:9000
 
 ```
 * method names map to srt_function names _(ex. SRTKabuki.connect is libsrt.srt_connect)_
@@ -50,7 +50,7 @@ import sys
 from  srtkabuki import SRTKabuki
 
 
-kabuki = SRTKabuki(sys.argv[1])
+kabuki = SRTKabuki(sys.argv[1]) # srt://127.0.0.1:9000
 kabuki.connect()
 buffsize=1316
 buffer = kabuki.mkbuff(buffsize)

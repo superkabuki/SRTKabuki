@@ -1,4 +1,4 @@
-# Secure Reliable Transport Kabuki
+# `S`ecure `R`eliable `T`ransport `Kabuki`
 ### Call libsrt C functions from python.
 
 ### My goal here is to be able to use the SRT protocol in python 

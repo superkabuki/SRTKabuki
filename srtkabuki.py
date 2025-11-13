@@ -128,10 +128,11 @@ class SRTKabuki:
         load_srt load everything from libsrt.so
         """
         libsrt = None
-        libsrt = ctypes.CDLL(ctypes.util.find_library("libsrt.so"))
+        libsrt = ctypes.CDLL("libsrt.so")
         if not libsrt:
             raise OSError("failed to load libsrt.so")
         return libsrt
+
 
     def accept(self):
         """
@@ -281,11 +282,11 @@ class SRTKabuki:
         self.getlasterror()
         return recvd_size
 
-    def mkbuff(self, buffsize):
+    def mkbuff(self, buffsize,data=b''):
         """
         mkbuff make a c function compatible buffer
         """
-        return  ctypes.create_string_buffer(buffsize)
+        return  ctypes.create_string_buffer(data,buffsize)
 
     def recvmsg(self, buffer,sock=None):
         """

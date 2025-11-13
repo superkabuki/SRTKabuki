@@ -5,6 +5,20 @@
 and to do so with just a few lines of code.
 <BR> 
 ___
+
+## When is the release coming?
+
+I'm fixing to get ready to start a release. One thing I want to smooth out is<br>
+loading the c libs, libc and libsrt. <BR> There are a couple of ways to do it with ctypes.util<br>
+and I'm trying figure out how to load the libs in as many environments as possible. <BR>
+As usual, __I will not be supporting Windows platforms directly__, I just don't know them. <BR>If someone wants to make a patch or whatever to support
+windows platforms, I will accept it.
+
+<br>
+
+To answer the question,<BR> __probably by Thanksgiving I will make a testing release__.
+___
+
 ### SRTKabuki is classy.
 * SRTKabuki is a python class that implements SRT. <BR>
 * No matter what you're doing, you start with
@@ -29,6 +43,7 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### NEWS
+* 11/12/2025 : __Parsing SCTE-35 from SRT__ is now working. 
 * 11/08/2025 : __Boom goes the dynamite, reading srt output from srt-live-transmit now works.__
 * 11/05/2025 : It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..
 * 11/04/2025 : started on epoll stuff. it's really started coming together, a couple more weeks to a release I think.

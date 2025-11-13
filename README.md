@@ -36,10 +36,24 @@ ___
 * 10/30/2025 :  __Today I got basic downloading files over a network using SRT working__,cleaning up code for a new commit. 
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed
 ___
+### Install 
+##### This is just for  testing
+
+```sh
+git clone https://github.com/Haivision/srt
+cd srt
+cmake build .
+make all   # libsrt.so will be in this directory
+
+git clone https://github.com/superkabuki/SRTKabuki # 
+cp SRTKabuki/*.py .  # copy the python files to the srt dir so that we have everythng together for testing
+
+```
+### until I do a release, run everythng in the srt directory.
 
 
 
-### Examples
+# Examples
 * The smoketest from the libsrt docs.
 * Install libsrt https://github.com/Haivision/srt
 * create the file livekabuki.py
@@ -77,6 +91,189 @@ srt-live-transmit udp://127.0.0.1:1234 srt://:4201
 
 ```sed
 python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
+```
+___
+# Parse SCTE-35 from SRT streams with SRTKabuki
+
+1) install libsrt
+2) pip install threefive
+
+3) create srtscte35.py
+```py3
+#!/usr/bin/env python3
+
+import sys
+import time
+from srtkabuki import SRTKabuki
+from threefive import Stream, Cue
+
+
+PACKETSIZE = 188
+BUFFSIZE = 1456
+SYNC_BYTE = b"G"
+
+
+def spinner(lc):
+    """
+    cli spinner to let you know things are running.
+    """
+    spin_map = {
+        79: " |",
+        77: " /",
+        73: " -",
+        71: " \\",
+    }
+
+    for k, v in spin_map.items():
+        if lc % k == 0:
+            print(v, "", end="\r")
+    if lc % 1800 == 0:
+        lc = 0
+
+
+def sync_byte(stuff):
+    """
+    sync_byte check stuff for sync_byte
+    """
+    return stuff[0:1] == SYNC_BYTE
+
+
+def parse_packet(packet, strm):
+    """
+    parse_packet check mpegts packet for scte35
+    """
+    if sync_byte(packet):
+        if len(packet) == PACKETSIZE:
+            cue = strm._parse(packet)
+            if cue:
+                Cue(packet).show()
+
+
+def packetize(data):
+    """
+    packetize split data into mpegts packets
+    """
+    return [data[i : i + PACKETSIZE] for i in range(0, len(data), PACKETSIZE)]
+
+
+def parse_mpegts(data, strm):
+    """
+    parse_mpegts split data into packets
+    """
+    if len(data) >= PACKETSIZE:
+        if sync_byte(data):
+            packets = packetize(data)
+            for packet in packets:
+                parse_packet(packet, strm)
+
+
+def preflight():
+    """
+    preflight init SRTKabuki instance,
+    a buffer, and a threefive.Stream instance
+    """
+    kabuki = SRTKabuki(sys.argv[1])
+    kabuki.connect()
+    buffsize = 1456
+    buffer = kabuki.mkbuff(BUFFSIZE)
+    strm = Stream(tsdata=None)
+    return kabuki, buffer, strm
+
+
+if __name__ == "__main__":
+    kabuki, buffer, strm = preflight()
+    lc = 0
+    data = b""
+    while True:
+        st = kabuki.recvmsg(buffer)
+        data = buffer.raw
+        spinner(lc)
+        lc += 1
+        buffer = kabuki.mkbuff(BUFFSIZE)
+        parse_mpegts(data, strm)
+
+
+```
+
+4) read srt stream with srtscte35.py
+```py3
+
+python3 srtscte35.py srt://1.2.3.4:9000
+```
+
+5) output
+```js
+a@fu:~/srt$ python3 srtscte35.py srt://127.0.0.1:4201
+127.0.0.1 4201
+startup: ✓
+ipv4int: ✓
+create_socket: ✓
+connect: ✓
+{\ 
+    "info_section": {
+        "table_id": "0xfc",
+        "section_syntax_indicator": false,
+        "private": false,
+        "sap_type": "0x03",
+        "sap_details": "No Sap Type",
+        "section_length": 67,
+        "protocol_version": 0,
+        "encrypted_packet": false,
+        "encryption_algorithm": 0,
+        "pts_adjustment": 2.3,
+        "cw_index": "0x00",
+        "tier": "0x0fff",
+        "splice_command_length": 20,
+        "splice_command_type": 5,
+        "descriptor_loop_length": 30,
+        "crc": "0x37b199ef"
+    },
+    "command": {
+        "command_length": 20,
+        "command_type": 5,
+        "name": "Splice Insert",
+        "time_specified_flag": true,
+        "pts_time": 72825.523933,
+        "break_auto_return": true,
+        "break_duration": 119.986533,
+        "splice_event_id": 1,
+        "splice_event_cancel_indicator": false,
+        "out_of_network_indicator": true,
+        "program_splice_flag": true,
+        "duration_flag": true,
+        "splice_immediate_flag": false,
+        "event_id_compliance_flag": true,
+        "unique_program_id": 39321,
+        "avail_num": 1,
+        "avails_expected": 1
+    },
+    "descriptors": [
+             {
+            "tag": 2,
+            "identifier": "CUEI",
+            "name": "Segmentation Descriptor",
+            "descriptor_length": 28,
+            "segmentation_event_cancel_indicator": false,
+            "segmentation_event_id": "0x00",
+            "segmentation_event_id_compliance_indicator": true,
+            "program_segmentation_flag": true,
+            "segmentation_duration_flag": true,
+            "delivery_not_restricted_flag": false,
+            "web_delivery_allowed_flag": false,
+            "no_regional_blackout_flag": false,
+            "archive_allowed_flag": false,
+            "device_restrictions": "Restrict Group 0",
+            "segmentation_duration": 120.0,
+            "segmentation_message": "Provider Placement Opportunity Start",
+            "segmentation_type_id": 52,
+            "segmentation_upid_length": 8,
+            "segmentation_upid_type": 1,
+            "segmentation_upid_type_name": "Type 0x01 is deprecated, use MPU type 0x0C",
+            "segmentation_upid": "10100000",
+            "segment_num": 0,
+            "segments_expected": 0
+        }
+    ]
 ```
 
 look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.

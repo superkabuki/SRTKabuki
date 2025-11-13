@@ -52,20 +52,24 @@ ___
 * 10/29/2025 :  I've been stuck on setting SRTO_TRANSTYPE and SRT_SOCKOPT correctly ,but I figured it out today.Super jazzed
 ___
 ### Install 
-##### This is just for  testing
+##### (This is just for pre-release testing)
+
+* __step 1__ ( if you have libsrt already installed, you can skip this step )
 
 ```sh
 git clone https://github.com/Haivision/srt
 cd srt
 cmake build .
 make all   # libsrt.so will be in this directory
-
-git clone https://github.com/superkabuki/SRTKabuki # 
-cp SRTKabuki/*.py .  # copy the python files to the srt dir so that we have everythng together for testing
+make install # this will install to /usr/local/lib, make sure the path is in your LD_LIBRARY_PATH, or however you find libs.
 
 ```
-### until I do a release, run everythng in the srt directory.
+* __step 2__
+```sh
+git clone https://github.com/superkabuki/SRTKabuki  
 
+```
+* I'll do a pip package soon.
 
 
 # Examples
@@ -110,110 +114,12 @@ python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
 ___
 # Parse SCTE-35 from SRT streams with SRTKabuki
 
-1) install libsrt
+1) Do install from above
 2) pip install threefive
-
-3) create srtscte35.py
-```py3
-#!/usr/bin/env python3
-
-import sys
-import time
-from srtkabuki import SRTKabuki
-from threefive import Stream, Cue
-
-
-PACKETSIZE = 188
-BUFFSIZE = 1456
-SYNC_BYTE = b"G"
-
-
-def spinner(lc):
-    """
-    cli spinner to let you know things are running.
-    """
-    spin_map = {
-        79: " |",
-        77: " /",
-        73: " -",
-        71: " \\",
-    }
-
-    for k, v in spin_map.items():
-        if lc % k == 0:
-            print(v, "", end="\r")
-    if lc % 1800 == 0:
-        lc = 0
-
-
-def sync_byte(stuff):
-    """
-    sync_byte check stuff for sync_byte
-    """
-    return stuff[0:1] == SYNC_BYTE
-
-
-def parse_packet(packet, strm):
-    """
-    parse_packet check mpegts packet for scte35
-    """
-    if sync_byte(packet):
-        if len(packet) == PACKETSIZE:
-            cue = strm._parse(packet)
-            if cue:
-                Cue(packet).show()
-
-
-def packetize(data):
-    """
-    packetize split data into mpegts packets
-    """
-    return [data[i : i + PACKETSIZE] for i in range(0, len(data), PACKETSIZE)]
-
-
-def parse_mpegts(data, strm):
-    """
-    parse_mpegts split data into packets
-    """
-    if len(data) >= PACKETSIZE:
-        if sync_byte(data):
-            packets = packetize(data)
-            for packet in packets:
-                parse_packet(packet, strm)
-
-
-def preflight():
-    """
-    preflight init SRTKabuki instance,
-    a buffer, and a threefive.Stream instance
-    """
-    kabuki = SRTKabuki(sys.argv[1])
-    kabuki.connect()
-    buffsize = 1456
-    buffer = kabuki.mkbuff(BUFFSIZE)
-    strm = Stream(tsdata=None)
-    return kabuki, buffer, strm
-
-
-if __name__ == "__main__":
-    kabuki, buffer, strm = preflight()
-    lc = 0
-    data = b""
-    while True:
-        st = kabuki.recvmsg(buffer)
-        data = buffer.raw
-        spinner(lc)
-        lc += 1
-        buffer = kabuki.mkbuff(BUFFSIZE)
-        parse_mpegts(data, strm)
-
-
-```
-
-4) read srt stream with srtscte35.py
+3) read srt stream with srtscte35.py
 ```py3
 
-python3 srtscte35.py srt://1.2.3.4:9000
+python3 srtscte35.py srt://127.0.0.1:4201
 ```
 
 5) output
@@ -299,6 +205,11 @@ ___
 
 ```py3
 Help on class SRTKabuki in module srtkabuki:
+
+class SRTKabuki(builtins.object)
+ |  SRTKabuki(srturl)
+ |  
+ |  SRTKabuki Pythonic Secure Reliable Transport
  |  
  |  Methods defined here:
  |  
@@ -341,8 +252,8 @@ Help on class SRTKabuki in module srtkabuki:
  |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
- |      and save it as local_file     
- |  
+ |      and save it as local_file
+ |
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
  |  
@@ -364,7 +275,7 @@ Help on class SRTKabuki in module srtkabuki:
  |  mk_sockaddr_ptr(self, addr, port)
  |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
  |  
- |  mkbuff(self, buffsize)
+ |  mkbuff(self, buffsize, data=b'')
  |      mkbuff make a c function compatible buffer
  |  
  |  recv(self, buffer)
@@ -381,7 +292,7 @@ Help on class SRTKabuki in module srtkabuki:
  |  
  |  send(self, msg, sock=None)
  |      send srt_send
- |  
+ |
  |  sendfile(self, filename, sock=None)
  |      sendfile srt_sendfile
  |  
@@ -400,5 +311,6 @@ Help on class SRTKabuki in module srtkabuki:
  |  split_url(url)
  |      split_url, split srt url into addr,port, path and args
  |  
+ |  ----------------------------------------------------------------------
 
 ```

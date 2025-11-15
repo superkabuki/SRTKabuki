@@ -44,6 +44,9 @@ def parse_packet(packet, strm):
     """
     if has_sync_byte(packet):
         if at_least_a_packet(packet):
+            # threefive.Stream will handle 
+            # the mpegts stuff and SCTE-35.
+            # We just feed it packets
             cue = strm._parse(packet)
             if cue:
                 Cue(packet).show()

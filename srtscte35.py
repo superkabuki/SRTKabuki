@@ -60,7 +60,6 @@ def preflight():
     """
     kabuki = SRTKabuki(sys.argv[1])
     kabuki.connect()
-    buffsize = 1456
     buffer = kabuki.mkbuff(BUFFSIZE)
     strm = Stream(tsdata=None)
     return kabuki, buffer, strm

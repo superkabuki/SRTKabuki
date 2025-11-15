@@ -1,57 +1,69 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 from srtkabuki import SRTKabuki
 from threefive import Stream, Cue
 
 
 PACKETSIZE = 188
-BUFFSIZE = 1316
+BUFFSIZE = 1456 
 SYNC_BYTE = b"G"
+SPIN=False
 
 
 def spinner(lc):
     """
-    cli spinner to let you know things are running.
+    spinner show me things are working.
     """
-    spins = ["\\", "-", "/", "|"]
-    lc %= len(spins)
-    print(spins[lc], file=sys.stderr, end="\r")
+    spins = ["|","\\",  "-", "/"]
+    if SPIN:
+        lc %= len(spins)
+        print(spins[lc], file=sys.stderr, end="\r")
+        lc +=1
+    return lc
 
 
-def sync_byte(data):
+def has_sync_byte(stuff):
     """
-    sync_byte check stuff for sync_byte
+    has_sync_byte check stuff for sync_byte
     """
-    return data[0:1] == SYNC_BYTE
+    return stuff[0:1] == SYNC_BYTE
 
+
+def at_least_a_packet(stuff):
+    """
+    at_least_a_packet  check if stuff  is at least PACKETSIZE
+    """
+    return len(stuff) >= PACKETSIZE
+    
 
 def parse_packet(packet, strm):
     """
     parse_packet check mpegts packet for scte35
     """
-    if sync_byte(packet):
-        if len(packet) == PACKETSIZE:
+    if has_sync_byte(packet):
+        if at_least_a_packet(packet):
             cue = strm._parse(packet)
             if cue:
                 Cue(packet).show()
 
 
-def packetize(data):
+def packetize(datagram):
     """
-    packetize split data into mpegts packets
+    packetize split datagram into mpegts packets
     """
-    return [data[i : i + PACKETSIZE] for i in range(0, len(data), PACKETSIZE)]
+    return [datagram[i : i + PACKETSIZE] for i in range(0, len(datagram), PACKETSIZE)]
 
 
-def parse_mpegts(data, strm):
+def parse_datagram(datagram, strm):
     """
-    parse_mpegts split data into packets
+    parse_datagram split datagram into mpegts packets
     """
-    if len(data) >= PACKETSIZE:
-        if sync_byte(data):
-            _=[parse_packet(packet, strm) for packet  in packetize(data)]
-
+    if at_least_a_packet(datagram):
+        if has_sync_byte(datagram):
+            _=[parse_packet(packet, strm) for packet  in packetize(datagram)]
+                 
 
 def preflight():
     """
@@ -68,11 +80,10 @@ def preflight():
 if __name__ == "__main__":
     kabuki, buffer, strm = preflight()
     lc = 0
-    data = b""
+    datagram = b""
     while True:
         st = kabuki.recvmsg(buffer)
-        data = buffer.raw
-        spinner(lc)
-        lc += 1
+        datagram = buffer.raw
+        lc = spinner(lc)
         buffer = kabuki.mkbuff(BUFFSIZE)
-        parse_mpegts(data, strm)
+        parse_datagram(datagram, strm)

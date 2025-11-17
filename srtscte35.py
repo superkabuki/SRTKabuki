@@ -7,14 +7,17 @@ from threefive import Stream, Cue
 
 
 PACKETSIZE = 188
+# set buffer to BUFFSIZE but send 1316 datagrams?
+# That's how it reads to me, and it seems to work best.
 BUFFSIZE = 1456 
 SYNC_BYTE = b"G"
-SPIN=False
+SPIN=True
 
 
 def spinner(lc):
     """
-    spinner show me things are working.
+    spinner show me things are working,
+    it only spins when it's parsing data.
     """
     spins = ["|","\\",  "-", "/"]
     if SPIN:
@@ -44,9 +47,6 @@ def parse_packet(packet, strm):
     """
     if has_sync_byte(packet):
         if at_least_a_packet(packet):
-            # threefive.Stream will handle 
-            # the mpegts stuff and SCTE-35.
-            # We just feed it packets
             cue = strm._parse(packet)
             if cue:
                 Cue(packet).show()
@@ -90,3 +90,23 @@ if __name__ == "__main__":
         lc = spinner(lc)
         buffer = kabuki.mkbuff(BUFFSIZE)
         parse_datagram(datagram, strm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

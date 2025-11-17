@@ -13,7 +13,7 @@ import inspect
 
 
 from static import SRT_DEFAULT_RECVFILE_BLOCK
-from sockopts import SRTO_TRANSTYPE
+from sockopts import SRTO_TRANSTYPE, SRTO_MESSAGEAPI, SRTO_CONGESTION
 
 # Socket Address structures
 
@@ -26,10 +26,18 @@ class sockaddr(ctypes.Structure):
 
 
 class in_addr(ctypes.Structure):
+    """
+    in_addr  struct for ipv4
+    """
+
     _fields_ = [("s_addr", ctypes.c_uint32)]  # IPv4
 
 
 class sockaddr_in(ctypes.Structure):
+    """
+    sockaddr_in socketaddr_in struct
+    """
+
     _fields_ = [
         ("sin_family", ctypes.c_short),
         ("sin_port", ctypes.c_ushort),
@@ -39,6 +47,10 @@ class sockaddr_in(ctypes.Structure):
 
 
 class sockaddr_in6(ctypes.Structure):  # For IPv6
+    """
+    sockaddr_in6 socketaddr_in6 struct
+    """
+
     _fields_ = [
         ("sin6_family", ctypes.c_ushort),
         ("sin6_port", ctypes.c_ushort),
@@ -49,7 +61,13 @@ class sockaddr_in6(ctypes.Structure):  # For IPv6
 
 
 class addrinfo(ctypes.Structure):
-    pass  # Forward declaration for self-referential pointer
+    """
+    addrinfo Forward declaration
+    for self-referential pointer and stuff.
+    I don't know why.
+    """
+
+    pass
 
 
 addrinfo._fields_ = [
@@ -65,12 +83,17 @@ addrinfo._fields_ = [
 
 
 class sockaddr_storage(ctypes.Structure):
+    """
+    sockaddr_storage yet another struct to match
+    a c struct.
+    """
+
     _fields_ = [
         ("ss_family", ctypes.c_ushort),
         (
             "ss_data",
             ctypes.c_ubyte * (128 - ctypes.sizeof(ctypes.c_ushort)),
-        ),  # Example size, adjust as needed
+        ),
     ]
 
 
@@ -80,7 +103,7 @@ class SRTKabuki:
     """
 
     def __init__(self, srturl):
-        self.addr,self.port,self.path, self.args=self.split_url(srturl)
+        self.addr, self.port, self.path, self.args = self.split_url(srturl)
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
@@ -96,14 +119,14 @@ class SRTKabuki:
         """
         split_url, split srt url into addr,port, path and args
         """
-        addr=port=path=args =None
-        url = url.replace('srt://','')
-        if '?' in url:
-            url, args=url.split('?')
-        if '/' in url:
-            url,path = url.split('/',1)
-        addr,port = url.split(':',1)
-        return addr,int(port),path,args
+        addr = port = path = args = None
+        url = url.replace("srt://", "")
+        if "?" in url:
+            url, args = url.split("?")
+        if "/" in url:
+            url, path = url.split("/", 1)
+        addr, port = url.split(":", 1)
+        return addr, int(port), path, args
 
     def load_libc(self):
         """
@@ -132,7 +155,6 @@ class SRTKabuki:
         if not libsrt:
             raise OSError("failed to load libsrt.so")
         return libsrt
-
 
     def accept(self):
         """
@@ -204,7 +226,7 @@ class SRTKabuki:
         self.libsrt.srt_epoll_add_usock(self.eid, self.sock, ctypes.byref(events))
         self.getlasterror()
 
-    def epoll_wait(self, readfds, writefds, ms_timeout, lrds, lwrds):
+    def epoll_wait(self, readfds, writefds, ms_timeout, lrfds, lwfds):
         """
         epoll_wait srt_epoll_wait
         """
@@ -232,10 +254,10 @@ class SRTKabuki:
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
-        out= f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace("Success","✓")
-        print(
-            out, file=sys.stderr
+        out = f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace(
+            "Success", "✓"
         )
+        print(out, file=sys.stderr)
 
     def getsockstate(self, sock=None):
         """
@@ -253,24 +275,24 @@ class SRTKabuki:
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
 
-    def recv(self, buffer):
+    def recv(self, buffer, sock=None):
         """
         recv srt_recv
         """
         sock = self.chk_sock(sock)
-     #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        st = self.libsrt.srt_recv(
-        sock, buffer, len(buffer)
-        )
-      #  self.getlasterror()
+        #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+        st = self.libsrt.srt_recv(sock, buffer, len(buffer))
+        #  self.getlasterror()
         return st
 
     def recvfile(self, local_filename, sock=None):
         """
         recvfile srt_recvfile
         """
-        sock = self.chk_sock(sock)
-        filesize = self.recv(sock=sock)
+        sock = self.sock
+        buff = self.mkbuff(1316)
+        self.recv(buff)
+        filesize = buff.raw
         offset = ctypes.c_int64(0)
         recvd_size = self.libsrt.srt_recvfile(
             sock,
@@ -282,22 +304,20 @@ class SRTKabuki:
         self.getlasterror()
         return recvd_size
 
-    def mkbuff(self, buffsize,data=b''):
+    def mkbuff(self, buffsize, data=b""):
         """
         mkbuff make a c function compatible buffer
         """
-        return  ctypes.create_string_buffer(data,buffsize)
+        return ctypes.create_string_buffer(data, buffsize)
 
-    def recvmsg(self, buffer,sock=None):
+    def recvmsg(self, buffer, sock=None):
         """
         recvmsg srt_recvmsg
         """
         sock = self.chk_sock(sock)
-     #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-        st = self.libsrt.srt_recvmsg(
-        sock, buffer, len(buffer)
-        )
-      #  self.getlasterror()
+        #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+        st = self.libsrt.srt_recvmsg(sock, buffer, len(buffer))
+        #  self.getlasterror()
         return st
 
     def send(self, msg, sock=None):
@@ -324,25 +344,65 @@ class SRTKabuki:
         )
         self.getlasterror()
 
-
     def sendmsg2(self, msg, sock=None):
         """
         sendmsg2 srt_sendmsg2
         """
         sock = self.chk_sock(sock)
-     #   msg = self.bytemsg(msg)
+        #   msg = self.bytemsg(msg)
         st = self.libsrt.srt_sendmsg2(sock, msg, 32, None)
         self.getlasterror()
         time.sleep(0.001)
+
+    @staticmethod
+    def _new_val_n_sizeof(val):
+        """
+        only called by setsockflag
+        to set ctype type for val
+        and get the ctype size of val.
+        """
+        new_val = None
+        sizeof = None
+        if isinstance(val, int):
+            new_val = ctypes.c_int(val)
+            sizeof = ctypes.sizeof(ctypes.c_int64)
+        if isinstance(val, bool):
+            new_val = ctypes.c_bool(val)
+            sizeof = ctypes.sizeof(ctypes.c_bool)
+        if isinstance(val, str):
+            new_val = val = self.bytemsg(val)
+            sizeof = ctype.sizeof(val)
+        return new_val, sizeof
 
     def setsockflag(self, flag, val):
         """
         setsockflag  srt_setsockflag
 
         """
-        val = ctypes.c_int(val)
-        self.libsrt.srt_setsockflag(
-            self.sock, flag, ctypes.byref(val), ctypes.sizeof(ctypes.c_int64))
+        new_val, sizeof = self._new_val_n_sizeof(val)
+        self.libsrt.srt_setsockflag(self.sock, flag, ctypes.byref(new_val), sizeof)
+        self.getlasterror()
+
+    def congestion_control(self, algo):
+        """
+        congestion_control set the congestion control
+        algorithm. can also be set with livecc() and filecc()
+        methods.
+        """
+        self.setsockflag(SRTO_CONGESTION, algo)
+
+    def livecc(self):
+        """
+        livecc set congestion control to live
+        """
+        self.congestion_control("live")
+        self.getlasterror()
+
+    def filecc(self):
+        """
+        filecc set congestion control to file
+        """
+        self.congestion_control("file")
         self.getlasterror()
 
     def startup(self):
@@ -380,9 +440,9 @@ class SRTKabuki:
         bytemsg convert python byte string
         to a C string buffer
         """
-        if not isinstance(msg,(bytes,str)):
+        if not isinstance(msg, (bytes, str)):
             msg = str(msg)
-        if isinstance(msg,str):
+        if isinstance(msg, str):
             msg = msg.encode("utf8")
         if not isinstance(msg, bytes):
             msg = b"Message needs to be bytes"
@@ -406,21 +466,21 @@ class SRTKabuki:
         """
         fetch fetch remote_file fron host on port
         and save it as local_file
-
-        all args are strings.
         """
         yes = 1
+        no = 0
         self.setsockflag(SRTO_TRANSTYPE, yes)
+        self.setsockflag(SRTO_MESSAGEAPI, no)
         self.connect()
         self.request_file(remote_file)
         self.recvfile(local_file)
         self.close()
         self.cleanup()
 
-    def chk_sock(self,sock):
+    def chk_sock(self, sock=None):
         """
         chk_sock if we don't have a sock, use self.sock
         """
         if not sock:
-            sock=self.sock
+            sock = self.sock
         return sock

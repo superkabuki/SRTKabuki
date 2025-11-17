@@ -253,7 +253,7 @@ class SRTKabuki:
 
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
-        caller = inspect.currentframe().f_back.f_code.co_name
+        caller = inspect.currentframe().f_back.f_code.co_name  # which method called this method. 
         out = f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace(
             "Success", "✓"
         )
@@ -292,7 +292,7 @@ class SRTKabuki:
         sock = self.sock
         buff = self.mkbuff(1316)
         self.recv(buff)
-        filesize = buff.raw
+        filesize = buff.value
         offset = ctypes.c_int64(0)
         recvd_size = self.libsrt.srt_recvfile(
             sock,
@@ -306,9 +306,23 @@ class SRTKabuki:
 
     def mkbuff(self, buffsize, data=b""):
         """
-        mkbuff make a c function compatible buffer
+        mkbuff make a c  buffer
+        to read into when receiving data.
         """
         return ctypes.create_string_buffer(data, buffsize)
+
+    def mkmsg(self, msg):
+        """
+        mkmsg convert python byte string
+        to a C string buffer when sending data
+        """
+        if not isinstance(msg, (bytes, str)):
+            msg = str(msg)
+        if isinstance(msg, str):
+            msg = msg.encode("utf8")
+        if not isinstance(msg, bytes):
+            msg = b"Message needs to be bytes"
+        return ctypes.create_string_buffer(msg, len(msg))
 
     def recvmsg(self, buffer, sock=None):
         """
@@ -349,38 +363,32 @@ class SRTKabuki:
         sendmsg2 srt_sendmsg2
         """
         sock = self.chk_sock(sock)
-        #   msg = self.bytemsg(msg)
+        #   msg = self.mkmsg(msg)
         st = self.libsrt.srt_sendmsg2(sock, msg, 32, None)
         self.getlasterror()
         time.sleep(0.001)
 
     @staticmethod
-    def _new_val_n_sizeof(val):
+    def new_val(val):
         """
-        only called by setsockflag
-        to set ctype type for val
-        and get the ctype size of val.
+        new_val convert val into a ctypes type
         """
         new_val = None
-        sizeof = None
         if isinstance(val, int):
             new_val = ctypes.c_int(val)
-            sizeof = ctypes.sizeof(ctypes.c_int)
         if isinstance(val, bool):
             new_val = ctypes.c_bool(val)
-            sizeof = ctypes.sizeof(ctypes.c_bool)
-        if isinstance(val, str):
-            new_val = val = self.bytemsg(val)
-            sizeof = ctype.sizeof(val)
-        return new_val, sizeof
+        if isinstance(val, (str,bytes,)):
+            new_val = self.mkmsg(val)
+        return new_val
 
     def setsockflag(self, flag, val):
         """
         setsockflag  srt_setsockflag
 
         """
-        new_val, sizeof = self._new_val_n_sizeof(val)
-        self.libsrt.srt_setsockflag(self.sock, flag, ctypes.byref(new_val), sizeof)
+        new_val= self._new_val(val)
+        self.libsrt.srt_setsockflag(self.sock, flag, ctypes.byref(new_val), ctypes.sizeof(new_val))
         self.getlasterror()
 
     def congestion_control(self, algo):
@@ -412,8 +420,6 @@ class SRTKabuki:
         self.libsrt.srt_startup()
         self.getlasterror()
 
-    # helper methods not in libsrt
-
     def ipv4int(self, addr):
         """
         take a ipv4 string addr and make it an int
@@ -435,31 +441,15 @@ class SRTKabuki:
         #  (struct sockaddr*)&sa
         return ctypes.cast(sa_in_ptr, ctypes.POINTER(sockaddr)), ctypes.sizeof(sa_in)
 
-    def bytemsg(self, msg):
-        """
-        bytemsg convert python byte string
-        to a C string buffer
-        """
-        if not isinstance(msg, (bytes, str)):
-            msg = str(msg)
-        if isinstance(msg, str):
-            msg = msg.encode("utf8")
-        if not isinstance(msg, bytes):
-            msg = b"Message needs to be bytes"
-        return ctypes.create_string_buffer(msg, len(msg))
-
     def request_file(self, remote_file):
         """
         request_file request a file from a server
         """
-        remote_filename = remote_file.encode("utf8")
-        msg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
-        rfl = str(len(remote_filename)).encode("utf8")  # remote file length
-        rflen = ctypes.create_string_buffer(
-            rfl, len(rfl)
-        )  # remote file length written to a string buffer... I don't know.
+        rfname = self.mkmsg(remote_file)
+        rfl = str(len(msg))  # remote file length as string
+        rflen =mkmsg(rfl) 
         self.send(rflen)
-        self.send(msg)
+        self.send(rfname)
         self.getlasterror()
 
     def fetch(self, remote_file, local_file):

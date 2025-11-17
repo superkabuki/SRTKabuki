@@ -7,8 +7,6 @@ but I like being able to do
 
 from sockopts import  SRTO_RCVSYN
 
-it just seems more pythonic.
-
 '''
 
 SRTO_MSS = 0  # the Maximum Transfer Unit
@@ -21,7 +19,8 @@ SRTO_RCVBUF = 6  # UDT receiving buffer size
 SRTO_LINGER = 7  # waiting for unsent data when closing
 SRTO_UDP_SNDBUF = 8  # UDP sending buffer size
 SRTO_UDP_RCVBUF = 9  # UDP receiving buffer size
-# (some space left)
+# not defined  = 10
+# not defined  = 11
 SRTO_RENDEZVOUS = 12  # rendezvous connection mode
 SRTO_SNDTIMEO = 13  # send() timeout
 SRTO_RCVTIMEO = 14  # recv() timeout
@@ -49,7 +48,7 @@ SRTO_PEERVERSION = 35  # Peer SRT Version (from SRT Handshake)
 SRTO_CONNTIMEO = 36  # Connect timeout in msec. Caller default: 3000 rendezvous (x 10)
 SRTO_DRIFTTRACER = 37  # Enable or disable drift tracer
 SRTO_MININPUTBW = 38  # Minimum estimate of input stream rate.
-# (some space left)
+# not defined = 39
 SRTO_SNDKMSTATE = 40  # (GET) the current state of the encryption at the peer side
 SRTO_RCVKMSTATE = 41  # (GET) the current state of the encryption at the agent side
 SRTO_LOSSMAXTTL = 42  # Maximum possible packet reorder tolerance (number of packets to receive after loss to send lossreport)

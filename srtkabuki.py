@@ -365,7 +365,7 @@ class SRTKabuki:
         sizeof = None
         if isinstance(val, int):
             new_val = ctypes.c_int(val)
-            sizeof = ctypes.sizeof(ctypes.c_int64)
+            sizeof = ctypes.sizeof(ctypes.c_int)
         if isinstance(val, bool):
             new_val = ctypes.c_bool(val)
             sizeof = ctypes.sizeof(ctypes.c_bool)

@@ -8,15 +8,17 @@ ___
 
 ## When is the release coming?
 
-I'm fixing to get ready to start a release. One thing I want to smooth out is<br>
-loading the c libs, libc and libsrt. <BR> There are a couple of ways to do it with ctypes.util<br>
-and I'm trying figure out how to load the libs in as many environments as possible. <BR>
-As usual, __I will not be supporting Windows platforms directly__, I just don't know them. <BR>If someone wants to make a patch or whatever to support
-windows platforms, I will accept it.
+I'm fixing to get ready to start a release.
+__probably by Thanksgiving I will make a testing release__.
 
-<br>
+___
 
-To answer the question,<BR> __probably by Thanksgiving I will make a testing release__.
+## Supported Operating Systems
+
+* Tested on __OpenBSD and Debian Sid__. 
+* __If you can install libsrt__ in your environment, __SRTKabuki should work just fine.__
+* __I don't know Windows well enough to support it__, but I will accept Windows specific patches if needed.
+
 ___
 
 ### SRTKabuki is classy.

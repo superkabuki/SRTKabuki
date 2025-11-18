@@ -205,7 +205,6 @@ ___
 
 ```py3
 Help on class SRTKabuki in module srtkabuki:
-
 class SRTKabuki(builtins.object)
  |  SRTKabuki(srturl)
  |  
@@ -222,11 +221,7 @@ class SRTKabuki(builtins.object)
  |  bind(self)
  |      bind  srt_bind
  |  
- |  bytemsg(self, msg)
- |      bytemsg convert python byte string
- |      to a C string buffer
- |  
- |  chk_sock(self, sock)
+ |  chk_sock(self, sock=None)
  |      chk_sock if we don't have a sock, use self.sock
  |  
  |  cleanup(self)
@@ -234,6 +229,11 @@ class SRTKabuki(builtins.object)
  |  
  |  close(self, sock=None)
  |      close srt_close
+ |  
+ |  congestion_control(self, algo)
+ |      congestion_control set the congestion control
+ |      algorithm. can also be set with livecc() and filecc()
+ |      methods.
  |  
  |  connect(self)
  |      connect srt_connect
@@ -247,13 +247,16 @@ class SRTKabuki(builtins.object)
  |  epoll_create(self)
  |      epoll_create srt_epoll_create
  |  
- |  epoll_wait(self, readfds, writefds, ms_timeout, lrds, lwrds)
+ |  epoll_wait(self, readfds, writefds, ms_timeout, lrfds, lwfds)
  |      epoll_wait srt_epoll_wait
  |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
- |
+ |  
+ |  filecc(self)
+ |      filecc set congestion control to file
+ |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
  |  
@@ -266,6 +269,9 @@ class SRTKabuki(builtins.object)
  |  listen(self)
  |      listen srt_listen
  |  
+ |  livecc(self)
+ |      livecc set congestion control to live
+ |  
  |  load_libc(self)
  |      load_libc load getaddrinfo and freeaddrinfo from libc.so
  |  
@@ -276,25 +282,36 @@ class SRTKabuki(builtins.object)
  |      mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
  |  
  |  mkbuff(self, buffsize, data=b'')
- |      mkbuff make a c function compatible buffer
+ |      mkbuff make a c  buffer
+ |      to read into when receiving data.
  |  
- |  recv(self, buffer)
+ |  mkmsg(self, msg)
+ |      mkmsg convert python byte string
+ |      to a C string buffer when sending data
+ |  
+ |  new_val(self, val)
+ |      new_val convert val into a ctypes type
+ |  
+ |  recv(self, buffer, sock=None)
  |      recv srt_recv
  |  
- |  recvfile(self, local_filename, sock=None)
+ |  recvfile(self, local_file, sock=None)
  |      recvfile srt_recvfile
  |  
  |  recvmsg(self, buffer, sock=None)
  |      recvmsg srt_recvmsg
+ |  
+ |  remote_file_size(self)
+ |      read the remote file size message
  |  
  |  request_file(self, remote_file)
  |      request_file request a file from a server
  |  
  |  send(self, msg, sock=None)
  |      send srt_send
- |
+ |  
  |  sendfile(self, filename, sock=None)
- |      sendfile srt_sendfile
+ |        sendfile srt_sendfile
  |  
  |  sendmsg2(self, msg, sock=None)
  |      sendmsg2 srt_sendmsg2
@@ -313,4 +330,5 @@ class SRTKabuki(builtins.object)
  |  
  |  ----------------------------------------------------------------------
 
+  
 ```

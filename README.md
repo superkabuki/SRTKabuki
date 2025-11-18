@@ -43,6 +43,9 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### NEWS
+* 11/17/2025 : __Of course SRTKabuki runs on OpenBSD__ 
+* 11/16/2025 : libsrt now builds correctly and  builds the srt apps correctly with clang++ on OpenBSD
+* 11/14/2025 : added methods __SRTKabuki.livecc()__ and __SRTKabuki.filecc()__ to set __congestion control algorithm.__
 * 11/12/2025 : __Parsing SCTE-35 from SRT__ is now working. 
 * 11/08/2025 : __Boom goes the dynamite, reading srt output from srt-live-transmit now works.__
 * 11/05/2025 : It's porting pretty smooth, __cyclomatic complexity__ so far is __1.09__, that is sweet..

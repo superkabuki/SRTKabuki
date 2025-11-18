@@ -1,5 +1,5 @@
 # `S`ecure `R`eliable `T`ransport `Kabuki`
-### Call libsrt C functions from python.
+### Call [libsrt](https://github.com/Haivision/srt) C functions from python.
 
 ### My goal here is to be able to use the SRT protocol in python 
 and to do so with just a few lines of code.

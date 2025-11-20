@@ -304,7 +304,7 @@ class SRTKabuki:
         print("recvsize", recvsize)
         return recvsize
 
-    def mkbuff(self,buffsize, data=b""):
+    def mkbuff(self, buffsize, data=b""):
         """
         mkbuff make a c  buffer
         to read into when receiving data.
@@ -345,28 +345,22 @@ class SRTKabuki:
     def sendfile(self, filename, sock=None):
         """
           sendfile srt_sendfile
-
-        rfl = str(len(remote_filename)).encode("utf8")  # remote file length
-          print("rfl", rfl)
-          rflen = ctypes.create_string_buffer(
-              rfl, len(rfl)
-          )  # remote file length written to a string buffer
-          self.libsrt.srt_send(self.sock, rflen, ctypes.sizeof(ctypes.c_int(len(mesg))))
-
         """
         print(filename)
         sock = self.chk_sock(sock)
         filesize = os.path.getsize(filename)
         print("sendfile size ", filesize)
         msg = str(filesize).encode("utf8")
-        print("msg", msg)
-        #msgbuff = ctypes.create_string_buffer(msg, len(msg))
-        self.mkbuff(len(msg),msg)
-        self.send(msgbuff)
+      #  print("msg", msg)
+        msgbuff = ctypes.create_string_buffer(msg,len(msg))
+        print(msgbuff.value)
+        self.libsrt.srt_send(sock, msgbuff, 64)
+        self.getlasterror()
+      #  self.send(msgbuff)
         offset = ctypes.c_int64(0)
         self.libsrt.srt_sendfile(
             sock,
-            self.mkmsg(filename),
+            filename,
             ctypes.byref(offset),
             ctypes.c_int64(filesize),
             SRT_DEFAULT_RECVFILE_BLOCK,
@@ -378,7 +372,7 @@ class SRTKabuki:
         sendmsg2 srt_sendmsg2
         """
         sock = self.chk_sock(sock)
-        #   msg = self.mkmsg(msg)
+        msg = self.mkmsg(msg)
         st = self.libsrt.srt_sendmsg2(sock, msg, 32, None)
         self.getlasterror()
         time.sleep(0.001)
@@ -399,7 +393,7 @@ class SRTKabuki:
                 bytes,
             ),
         ):
-            nval = self.mkmsg(val)
+            nval = val = self.mkmsg(val)
         return nval
 
     def setsockflag(self, flag, val):
@@ -468,16 +462,14 @@ class SRTKabuki:
         return ctypes.cast(sa_in_ptr, ctypes.POINTER(sockaddr)), ctypes.sizeof(sa_in)
 
     def remote_file_size(self):
-        """
-        remote_file_size get the size of the 
-        remote  file to be recv'ed
-        """
         buffer_size = 20
         buffer = ctypes.create_string_buffer(buffer_size)
-        
         st = self.libsrt.srt_recv(self.sock, buffer, buffer_size)
-        file_size = int.from_bytes(buffer.value, byteorder="little")
-        print("remote file size", len(buffer.value))
+        try:
+            file_size = int(buffer.raw.replace(b'\x00',b''))
+        except:
+            file_size=int.from_bytes(buffer.raw,byteorder='little')
+        print("remote file size", file_size)
         self.getlasterror()
         return file_size
 
@@ -488,6 +480,7 @@ class SRTKabuki:
         remote_filename = remote_file.encode("utf8")
         mesg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
         rfl = str(len(remote_filename)).encode("utf8")  # remote file length
+        print("rfl", rfl)
         rflen = ctypes.create_string_buffer(
             rfl, len(rfl)
         )  # remote file length written to a string buffer

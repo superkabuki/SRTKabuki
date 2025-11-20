@@ -304,7 +304,7 @@ class SRTKabuki:
         print("recvsize", recvsize)
         return recvsize
 
-    def mkbuff(self, buffsize, data=b""):
+    def mkbuff(self,buffsize, data=b""):
         """
         mkbuff make a c  buffer
         to read into when receiving data.
@@ -360,7 +360,8 @@ class SRTKabuki:
         print("sendfile size ", filesize)
         msg = str(filesize).encode("utf8")
         print("msg", msg)
-        msgbuff = ctypes.create_string_buffer(msg, len(msg))
+        #msgbuff = ctypes.create_string_buffer(msg, len(msg))
+        self.mkbuff(len(msg),msg)
         self.send(msgbuff)
         offset = ctypes.c_int64(0)
         self.libsrt.srt_sendfile(
@@ -398,7 +399,7 @@ class SRTKabuki:
                 bytes,
             ),
         ):
-            nval = val = self.mkmsg(val)
+            nval = self.mkmsg(val)
         return nval
 
     def setsockflag(self, flag, val):
@@ -473,6 +474,7 @@ class SRTKabuki:
         """
         buffer_size = 20
         buffer = ctypes.create_string_buffer(buffer_size)
+        
         st = self.libsrt.srt_recv(self.sock, buffer, buffer_size)
         file_size = int.from_bytes(buffer.value, byteorder="little")
         print("remote file size", len(buffer.value))

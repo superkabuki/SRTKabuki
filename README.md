@@ -45,6 +45,8 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### NEWS
+* 11/20/2025 : Everything I expect to be working __is working__.
+* 11/19/2025 : cyclomatic complexity __A (1.2790697674418605)__
 * 11/17/2025 : __Of course SRTKabuki runs on OpenBSD__ 
 * 11/16/2025 : libsrt now builds correctly and  builds the srt apps correctly with clang++ on OpenBSD
 * 11/14/2025 : added methods __SRTKabuki.livecc()__ and __SRTKabuki.filecc()__ to set __congestion control algorithm.__

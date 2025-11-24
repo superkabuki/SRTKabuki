@@ -12,7 +12,9 @@ import socket
 import inspect
 
 
-from static import SRT_DEFAULT_RECVFILE_BLOCK
+from static import SRT_DEFAULT_RECVFILE_BLOCK,  SRT_LIVE , SRT_FILE 
+
+
 from sockopts import SRTO_TRANSTYPE,  SRTO_CONGESTION
 
 # Socket Address structures
@@ -259,7 +261,7 @@ class SRTKabuki:
         getsockstate srt_getsockstate
         """
         sock = self.chk_sock(sock)
-        self.libsrt.srt_getsockstate(sock)
+        print('SOCK STATE ', self.libsrt.srt_getsockstate(sock),  ' for sock '  , sock, file=sys.stderr)
         self.getlasterror()
 
     def listen(self):
@@ -454,7 +456,7 @@ class SRTKabuki:
     def remote_file_size(self):
         buffer_size = 20
         buffer =self.mkbuff(buffer_size)
-        self.libsrt.srt_recv(self.sock, buffer, buffer_size)
+        self.recv(buffer)
         try:
             file_size = int(buffer.raw.replace(b'\x00',b''))
         except:
@@ -468,14 +470,13 @@ class SRTKabuki:
         request_file request a file from a server
         """
         remote_filename = remote_file.encode("utf8")
-        mesg = self.mkmsg(remote_filename)
+        msg = self.mkmsg(remote_filename)
         rfl = str(len(remote_filename)).encode("utf8")  # remote file length
         print("rfl", rfl)
-        rflen = ctypes.create_string_buffer(
-            rfl, len(rfl)
-        )  # remote file length written to a string buffer
-        self.libsrt.srt_send(self.sock, rflen, ctypes.sizeof(ctypes.c_int(len(mesg))))
-        self.libsrt.srt_send(self.sock, mesg, len(mesg))
+        rflen =self.mkmsg(rfl)
+        self.send(rflen,self.sock)
+        self.getlasterror()
+        self.send(msg,self.sock)
         self.getlasterror()
 
     def fetch(self, remote_file, local_file):
@@ -483,8 +484,8 @@ class SRTKabuki:
         fetch fetch remote_file fron host on port
         and save it as local_file
         """
-        yes = 1
-        self.setsockflag(SRTO_TRANSTYPE, yes)
+        
+        self.setsockflag(SRTO_TRANSTYPE, SRT_FILE)
         self.connect()
         self.request_file(remote_file)
         self.recvfile(local_file)

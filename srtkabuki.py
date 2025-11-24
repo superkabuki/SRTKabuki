@@ -277,7 +277,6 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         st = self.libsrt.srt_recv(sock, buffer, len(buffer))
-        self.getlasterror()
         return st
 
     def recvfile(self, local_file, sock=None):
@@ -325,7 +324,6 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         st = self.libsrt.srt_recvmsg(sock, buffer, len(buffer))
-        self.getlasterror()
         return st
 
     def send(self, msg, sock=None):

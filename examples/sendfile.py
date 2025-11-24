@@ -6,7 +6,7 @@ import socket
 from ctypes.util import find_library
 from srtkabuki import SRTKabuki
 from sockopts import SRTO_TRANSTYPE
-
+from static import SRT_FILE
 
 def send_a_file(srtk):
     """
@@ -17,12 +17,14 @@ def send_a_file(srtk):
     close connection
     """
     fhandle = srtk.accept()
+    srtk.getsockstate()
+    srtk.getsockstate(fhandle)
     print(f"Accepted new connection (socket ID: {fhandle})...")
     smallbuff = srtk.mkbuff(1316)
     srtk.recv(smallbuff, fhandle)
-    filenamesize = smallbuff.value
+    filenamesize = int(smallbuff.value)
     print(filenamesize)
-    fbuff = srtk.mkbuff(1316)
+    fbuff = srtk.mkbuff(filenamesize)
     srtk.recv(fbuff, fhandle)
     srtk.sendfile(fbuff.value, fhandle)
     time.sleep(1)
@@ -38,8 +40,7 @@ def go():
     accept connections
     """
     srtk = SRTKabuki("srt://0.0.0.0:9000")
-    yes = 1
-    srtk.setsockflag(SRTO_TRANSTYPE, yes)
+    srtk.setsockflag(SRTO_TRANSTYPE, SRT_FILE)
     srtk.bind()
     srtk.listen()
     print("Waiting for connections...")

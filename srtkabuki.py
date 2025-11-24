@@ -12,8 +12,8 @@ import socket
 import inspect
 
 
-from static import SRT_DEFAULT_RECVFILE_BLOCK, AF_INET, AI_PASSIVE, SOCK_DGRAM
-from sockopts import SRTO_TRANSTYPE, SRTO_MESSAGEAPI, SRTO_CONGESTION
+from static import SRT_DEFAULT_RECVFILE_BLOCK
+from sockopts import SRTO_TRANSTYPE,  SRTO_CONGESTION
 
 # Socket Address structures
 
@@ -66,7 +66,6 @@ class addrinfo(ctypes.Structure):
     for self-referential pointer and stuff.
     I don't know why.
     """
-
     pass
 
 
@@ -173,8 +172,6 @@ class SRTKabuki:
         """
         bind  srt_bind
         """
-        self.libsrt.srt_bind.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int]
-        self.libsrt.srt_bind.restype = ctypes.c_int
         self.libsrt.srt_bind(self.sock, self.sa_ptr, self.sa_size)
         self.getlasterror()
 
@@ -190,8 +187,6 @@ class SRTKabuki:
         close srt_close
         """
         sock = self.chk_sock(sock)
-        self.libsrt.srt_close.argtypes = [ctypes.c_int]
-        self.libsrt.srt_close.restype = ctypes.c_int
         self.libsrt.srt_close(sock)
         self.getlasterror()
 
@@ -271,7 +266,6 @@ class SRTKabuki:
         """
         listen srt_listen
         """
-        self.libsrt.srt_listen.argtypes = [ctypes.c_int, ctypes.c_int]
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
 
@@ -280,7 +274,6 @@ class SRTKabuki:
         recv srt_recv
         """
         sock = self.chk_sock(sock)
-        #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         st = self.libsrt.srt_recv(sock, buffer, len(buffer))
         self.getlasterror()
         return st
@@ -322,16 +315,15 @@ class SRTKabuki:
             msg = msg.encode("utf8")
         if not isinstance(msg, bytes):
             msg = b"Message needs to be bytes"
-        return ctypes.create_string_buffer(msg, len(msg))
+        return self.mkbuff(len(msg), msg)
 
     def recvmsg(self, buffer, sock=None):
         """
         recvmsg srt_recvmsg
         """
         sock = self.chk_sock(sock)
-        #   self.libsrt.srt_recvmsg.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
         st = self.libsrt.srt_recvmsg(sock, buffer, len(buffer))
-        #  self.getlasterror()
+        self.getlasterror()
         return st
 
     def send(self, msg, sock=None):
@@ -346,17 +338,15 @@ class SRTKabuki:
         """
           sendfile srt_sendfile
         """
-        print(filename)
+        print(filename                                   )
         sock = self.chk_sock(sock)
         filesize = os.path.getsize(filename)
         print("sendfile size ", filesize)
         msg = str(filesize).encode("utf8")
-      #  print("msg", msg)
-        msgbuff = ctypes.create_string_buffer(msg,len(msg))
+        msgbuff=self.mkmsg(msg)
         print(msgbuff.value)
         self.libsrt.srt_send(sock, msgbuff, 64)
         self.getlasterror()
-      #  self.send(msgbuff)
         offset = ctypes.c_int64(0)
         self.libsrt.srt_sendfile(
             sock,
@@ -373,7 +363,7 @@ class SRTKabuki:
         """
         sock = self.chk_sock(sock)
         msg = self.mkmsg(msg)
-        st = self.libsrt.srt_sendmsg2(sock, msg, 32, None)
+        self.libsrt.srt_sendmsg2(sock, msg, 32, None)
         self.getlasterror()
         time.sleep(0.001)
 
@@ -393,7 +383,7 @@ class SRTKabuki:
                 bytes,
             ),
         ):
-            nval = val = self.mkmsg(val)
+            nval  = self.mkmsg(val)
         return nval
 
     def setsockflag(self, flag, val):
@@ -463,8 +453,8 @@ class SRTKabuki:
 
     def remote_file_size(self):
         buffer_size = 20
-        buffer = ctypes.create_string_buffer(buffer_size)
-        st = self.libsrt.srt_recv(self.sock, buffer, buffer_size)
+        buffer =self.mkbuff(buffer_size)
+        self.libsrt.srt_recv(self.sock, buffer, buffer_size)
         try:
             file_size = int(buffer.raw.replace(b'\x00',b''))
         except:
@@ -478,7 +468,7 @@ class SRTKabuki:
         request_file request a file from a server
         """
         remote_filename = remote_file.encode("utf8")
-        mesg = ctypes.create_string_buffer(remote_filename, len(remote_filename))
+        mesg = self.mkmsg(remote_filename)
         rfl = str(len(remote_filename)).encode("utf8")  # remote file length
         print("rfl", rfl)
         rflen = ctypes.create_string_buffer(

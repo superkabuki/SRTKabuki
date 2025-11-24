@@ -12,7 +12,7 @@ def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <srt_url>", file=sys.stderr)
         sys.exit(1)
-    srt_url = sys.argv[1] 
+    srt_url = sys.argv[1]
     srtk = SRTKabuki(srt_url) # srt://example.com:9000
     srtk.create_socket()
     yes = 1

@@ -19,6 +19,9 @@ def main():
         a -= 1
         srtk.sendmsg2(b"I am super cool")
         time.sleep(0.01)
+    time.sleep(1)
+    srtk.close()
+    srtk.cleanup()
 
 
 main()

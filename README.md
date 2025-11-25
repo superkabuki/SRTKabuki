@@ -4,6 +4,7 @@
 ___
 
 ### NEWS
+* 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 
 * 11/20/2025 : __SRTKabuki__ __is working__.
 * 11/19/2025 : cyclomatic complexity __A (1.2790697674418605)__
 * 11/18/2025 : rewrote examples __sendfile.cpp__ and __recvfile.cpp__ with __SRTKabuki__, both are working.
@@ -41,7 +42,7 @@ ___
 
 ### SRTKabuki is classy.
 * SRTKabuki is a python class that implements SRT. <BR>
-* No matter what you're doing, you start with
+* Start with
 ```py3
 from srtkabuki import SRTKabuki
 
@@ -50,7 +51,47 @@ srtk = SRTKabuki(srt_url) # srt://1.2.3.4:9000
 ```
 * method names map to srt_function names _(ex. SRTKabuki.connect is libsrt.srt_connect)_
 
-___
+### Well most of the time it's classy
+* For parsing raw live srt streams you can use the datagramer generator function
+
+```py3
+from srtkabuki import datagramer  
+
+srt_url = 'srt://10.10.11.13:9000'
+
+for datagram in datagramer(srt_url):
+    your_datagram_parser(datagram)
+```
+
+##### parsing SCTE-35 from an srt stream with threefive
+
+* datagramer is great when you need to add srt support to a parser like threefive.
+
+* threefive doesn't directly support srt, so datagramer reads the srt stream and passes data to threefive.
+
+```py3
+from srtkabuki import datagramer
+from threefive import Stream 
+
+PACKETSIZE=188
+
+def parseSCTE35(strm, datagram):
+"""
+parseSCTE35 split datagram into packets and
+pass to a threefive.Stream instance for parsing.
+"""
+_= [strm._parse(packet) for packet in
+    [datagram[i : i + PACKETSIZE]
+     for i in range(0, len(datagram), PACKETSIZE)]]
+
+
+if __name__=='__main__':
+    srt_url = 'srt://10.10.11.13:9000'
+    strm = Stream(tsdata=None) 
+    for datagram in datagramizer(srt_url):
+        parseSCTE35(datagram, strm)
+```
+
 ### SRTKabuki is fast.
 * since it calls libsrt C functions, SRTKabuki runs at C speed.
 ___ 

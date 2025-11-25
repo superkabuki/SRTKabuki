@@ -22,14 +22,18 @@ def send_a_file(srtk):
     print(f"Accepted new connection (socket ID: {fhandle})...")
     smallbuff = srtk.mkbuff(1316)
     srtk.recv(smallbuff, fhandle)
-    filenamesize = int(smallbuff.value)
-    print(filenamesize)
+    filenamesize = int.from_bytes(smallbuff.value,byteorder='little')
+    print('filenamesize ' ,filenamesize)
     fbuff = srtk.mkbuff(filenamesize)
     srtk.recv(fbuff, fhandle)
-    srtk.sendfile(fbuff.value, fhandle)
-    time.sleep(1)
-    srtk.close(fhandle)
-    srtk.getlasterror()
+    try:
+        srtk.sendfile(fbuff.value, fhandle)
+    except:
+        print(f'File {fbuff.value.decode()} Not Found.')
+    finally:
+        time.sleep(1)
+        srtk.close(fhandle)
+        srtk.getlasterror()
 
 
 def go():

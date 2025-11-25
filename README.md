@@ -33,7 +33,7 @@ __probably by Thanksgiving I will make a testing release__.
 ___
 
 ## Supported Operating Systems
-
+* __POSIX__ systems ( UNIX, Linux)
 * Tested on __OpenBSD and Debian Sid__. 
 * __If you can install libsrt__ in your environment, __SRTKabuki should work just fine.__
 * __I don't know Windows well enough to support it__, but I will accept Windows specific patches if needed.
@@ -63,35 +63,6 @@ for datagram in datagramer(srt_url):
     your_datagram_parser(datagram)
 ```
 
-##### parsing SCTE-35 from an srt stream with threefive
-
-* datagramer is great when you need to add srt support to a parser like threefive.
-
-* threefive doesn't directly support srt, so datagramer reads the srt stream and passes data to threefive.
-
-```py3
-from srtkabuki import datagramer
-from threefive import Stream 
-
-PACKETSIZE=188
-
-def parseSCTE35(strm, datagram):
-"""
-parseSCTE35 split datagram into packets and
-pass to a threefive.Stream instance for parsing.
-"""
-_= [strm._parse(packet) for packet in
-    [datagram[i : i + PACKETSIZE]
-     for i in range(0, len(datagram), PACKETSIZE)]]
-
-
-if __name__=='__main__':
-    srt_url = 'srt://10.10.11.13:9000'
-    strm = Stream(tsdata=None) 
-    for datagram in datagramizer(srt_url):
-        parseSCTE35(datagram, strm)
-```
-
 ### SRTKabuki is fast.
 * since it calls libsrt C functions, SRTKabuki runs at C speed.
 ___ 
@@ -104,29 +75,24 @@ You don't need to be a master of python, there's stuff to do besides just writin
 ___
 
 ### Install 
-##### (This is just for pre-release testing)
+##### Install libsrt
 
-* __step 1__ ( if you have libsrt already installed, you can skip this step )
+*if you have libsrt already installed, you can skip this step
 
+* Check if your os has a libsrt package and install it. SRTKabuki is built with libsrt v1.5.5.
+
+* or run the the install-libsrt.sh script in this repo.
+
+##### Install SRTKabuki
 ```sh
-git clone https://github.com/Haivision/srt
-cd srt
-cmake build .
-make all   # libsrt.so will be in this directory
-make install # this will install to /usr/local/lib, make sure the path is in your LD_LIBRARY_PATH, or however you find libs.
-
+python3 -mpip install srtkabuki --break-system-packages
 ```
-* __step 2__
-```sh
-git clone https://github.com/superkabuki/SRTKabuki  
-
-```
-* I'll do a pip package soon.
-
+___
 
 # Examples
-* The smoketest from the libsrt docs.
-* Install libsrt https://github.com/Haivision/srt
+
+##### The smoketest from the libsrt docs.
+
 * create the file livekabuki.py
 ```py3
 #!/usr/bin/env python3
@@ -164,14 +130,39 @@ srt-live-transmit udp://127.0.0.1:1234 srt://:4201
 python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
 ```
 ___
-# Parse SCTE-35 from SRT streams with SRTKabuki
 
-1) Do install from above
-2) pip install threefive
-3) read srt stream with srtscte35.py
+##### parsing SCTE-35 from an srt stream with threefive
+
+* install [threefive](https://github.com/superkabuki/SCTE35-Kabuki)
+  ```py3
+  python3 -mpip install threefive --break-system-packages
+  ```
+* datagramer is great when you need to add srt support to a parser like threefive.
+
+* threefive doesn't directly support srt, so datagramer reads the srt stream and passes data to threefive.
+
+
 ```py3
+from srtkabuki import datagramer
+from threefive import Stream 
 
-python3 srtscte35.py srt://127.0.0.1:4201
+PACKETSIZE=188
+
+def parseSCTE35(strm, datagram):
+"""
+parseSCTE35 split datagram into packets and
+pass to a threefive.Stream instance for parsing.
+"""
+_= [strm._parse(packet) for packet in
+    [datagram[i : i + PACKETSIZE]
+     for i in range(0, len(datagram), PACKETSIZE)]]
+
+
+if __name__=='__main__':
+    srt_url = 'srt://10.10.11.13:9000'
+    strm = Stream(tsdata=None) 
+    for datagram in datagramizer(srt_url):
+        parseSCTE35(datagram, strm)
 ```
 
 5) output
@@ -249,7 +240,6 @@ connect: ✓
     ]
 ```
 
-look in the examples directory to see the original c/c++ examples and the rewrites using SRTKabuki.
 ___
 
 

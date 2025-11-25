@@ -9,22 +9,33 @@ from threefive import Stream, Cue
 PACKETSIZE = 188
 # set buffer to BUFFSIZE but send 1316 datagrams?
 # That's how it reads to me, and it seems to work best.
-BUFFSIZE = 1456 
+BUFFSIZE = 1456
 SYNC_BYTE = b"G"
-SPIN=True
+SPIN = True
 
 
-def spinner(lc):
+def add_scte35_to_sidecar(scte35):
     """
-    spinner show me things are working,
-    it only spins when it's parsing data.
+    add_scte35_to_sidecar generates a sidecar file with the SCTE-35 Cues
     """
-    spins = ["|","\\",  "-", "/"]
-    if SPIN:
-        lc %= len(spins)
-        print(spins[lc], file=sys.stderr, end="\r")
-        lc +=1
-    return lc
+    pts = 0.001
+    with open("sidecar.txt", "a") as sidecar:
+        scte35.show()
+        if scte35.packet_data.pts:
+            pts = scte35.packet_data.pts
+        data = f"{pts},{scte35.encode()}\n"
+        sidecar.write(data)
+
+
+def parse_packet(packet, strm):
+    """
+    parse_packet check mpegts packet for scte35
+    """
+    if has_sync_byte(packet):
+        if at_least_a_packet(packet):
+            scte35 = check_for_scte35(packet)
+            if scte35:
+                add_scte35_to_sidecar(scte35)
 
 
 def has_sync_byte(stuff):
@@ -39,17 +50,14 @@ def at_least_a_packet(stuff):
     at_least_a_packet  check if stuff  is at least PACKETSIZE
     """
     return len(stuff) >= PACKETSIZE
-    
 
-def parse_packet(packet, strm):
+
+def check_for_scte35(packet):
     """
-    parse_packet check mpegts packet for scte35
+    check_for_scte35 parse a packet for SCTE-35
     """
-    if has_sync_byte(packet):
-        if at_least_a_packet(packet):
-            cue = strm._parse(packet)
-            if cue:
-                Cue(packet).show()
+    scte35 = strm._parse(packet)
+    return scte35
 
 
 def packetize(datagram):
@@ -65,8 +73,8 @@ def parse_datagram(datagram, strm):
     """
     if at_least_a_packet(datagram):
         if has_sync_byte(datagram):
-            _=[parse_packet(packet, strm) for packet  in packetize(datagram)]
-                 
+            _ = [parse_packet(packet, strm) for packet in packetize(datagram)]
+
 
 def preflight():
     """
@@ -76,12 +84,25 @@ def preflight():
     kabuki = SRTKabuki(sys.argv[1])
     kabuki.connect()
     buffer = kabuki.mkbuff(BUFFSIZE)
-    strm = Stream(tsdata=None)
-    return kabuki, buffer, strm
+    return kabuki, buffer
 
 
-if __name__ == "__main__":
-    kabuki, buffer, strm = preflight()
+def spinner(lc):
+    """
+    spinner show me things are working,
+    it only spins when it's parsing data.
+    """
+    spins = ["|", "\\", "-", "/"]
+    if SPIN:
+        lc %= len(spins)
+        print(spins[lc], file=sys.stderr, end="\r")
+        lc += 1
+    return lc
+
+
+def datagramizer():
+
+    kabuki, buffer = preflight()
     lc = 0
     datagram = b""
     while True:
@@ -89,24 +110,10 @@ if __name__ == "__main__":
         datagram = buffer.raw
         lc = spinner(lc)
         buffer = kabuki.mkbuff(BUFFSIZE)
+        yield datagram
+
+
+if __name__=='__main__':
+    strm = Stream(tsdata=None)
+    for datagram in datagramizer():    
         parse_datagram(datagram, strm)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

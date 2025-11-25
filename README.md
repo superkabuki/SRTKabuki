@@ -161,7 +161,7 @@ _= [strm._parse(packet) for packet in
 if __name__=='__main__':
     srt_url = 'srt://10.10.11.13:9000'
     strm = Stream(tsdata=None) 
-    for datagram in datagramizer(srt_url):
+    for datagram in datagramer(srt_url):
         parseSCTE35(datagram, strm)
 ```
 

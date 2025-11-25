@@ -4,6 +4,7 @@
 ___
 
 ### NEWS
+* 11/25/2025 : __Release v0.0.1 is now available via pip__ _(..and the crowd goes wild!)_
 * 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 
 * 11/20/2025 : __SRTKabuki__ __is working__.
 * 11/19/2025 : cyclomatic complexity __A (1.2790697674418605)__

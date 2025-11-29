@@ -10,56 +10,37 @@ Home of the datagramer function.
 
 import sys
 import time
-from functools import partial
 from .srtkabuki import SRTKabuki
+from .sockopts import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF
 
 
 PACKETSIZE = 188
 BUFFSIZE = 1456
-SYNC_BYTE = b"G"
-SPIN = True
 
 
-def _has_sync_byte(stuff):
+def packetizer(srt_url):
     """
-    _has_sync_byte check stuff for sync_byte
+    packetizer mpegts packet generator
     """
-    return stuff[0:1] == SYNC_BYTE
+    for datagram in datagramer(srt_url):
+        packets= [datagram[i : i + PACKETSIZE] for i in range(0, len(datagram), PACKETSIZE)]
+        for packet in packets:
+            yield packet
 
 
-def _at_least_a_packet(stuff):
+def preflight(srt_url):
     """
-    _at_least_a_packet  check if stuff  is at least PACKETSIZE
+    preflight init SRTKabuki instance,
+    and set sock flags as desired.
     """
-    return len(stuff) >= PACKETSIZE
-
-
-def _packetize(datagram):
-    """
-    _packetize split datagram into mpegts packets
-    """
-    return [datagram[i : i + PACKETSIZE] for i in range(0, len(datagram), PACKETSIZE)]
-
-
-def _preflight(srt_url):
-    """
-    _preflight init SRTKabuki instance,
-    a buffer, and a threefive.Stream instance
-    """
+    SRT_LIVE=0
     kabuki = SRTKabuki(srt_url)
+    kabuki.livecc()
+    kabuki.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
+    kabuki.setsockflag(SRTO_RCVSYN,1)
+    kabuki.setsockflag(SRTO_RCVBUF,32768)
     kabuki.connect()
-    buffer = kabuki.mkbuff(BUFFSIZE)
-    return kabuki, buffer
-
-
-def _onedgram(kabuki, buffer):
-    """
-    onedgram receive one datagram
-    """
-    st = kabuki.recv(buffer)
-    datagram = buffer.raw
-    buffer = kabuki.mkbuff(BUFFSIZE)
-    return datagram
+    return kabuki
 
 
 def datagramer(srt_url):
@@ -68,9 +49,12 @@ def datagramer(srt_url):
     take a live srt_url
     and return datagrams
     """
-    kabuki, buffer = _preflight(srt_url)
-    datagram = b""
-    return iter(partial(_onedgram, kabuki, buffer), b"")
+    kabuki = preflight(srt_url)
+    while True:
+        buffer = kabuki.mkbuff(BUFFSIZE)
+        st = kabuki.recv(buffer)
+        datagram = buffer.raw
+        yield datagram
 
 
 if __name__ == "__main__":

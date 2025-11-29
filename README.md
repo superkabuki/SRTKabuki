@@ -28,8 +28,10 @@ ___
 
 ## When is the release coming?
 
-I'm fixing to get ready to start a release.
-__probably by Thanksgiving I will make a testing release__.
+<s>I'm fixing to get ready to start a release.
+__probably by Thanksgiving I will make a testing release__. </s>
+
+__v0.0.1 is out__ _(and a little buggy)_. I will sos a new build with fixes this weekend.
 
 ___
 
@@ -104,11 +106,12 @@ from  srtkabuki import SRTKabuki
 
 kabuki = SRTKabuki(sys.argv[1]) # srt://127.0.0.1:9000
 kabuki.connect()
-buffsize=1316
+buffsize=1456
 buffer = kabuki.mkbuff(buffsize)
 while True:
-    st = kabuki.recvmsg(buffer)
+    kabuki.recvmsg(buffer)
     sys.stdout.buffer.write(buffer.raw)
+    buffer = kabuki.mkbuff(buffsize)
 ```
 
 * In a terminal window run

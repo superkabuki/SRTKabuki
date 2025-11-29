@@ -6,7 +6,7 @@ https://github.com/Haivision/srt/blob/master/examples/test-c-client.c
 import sys
 import time
 from srtkabuki import SRTKabuki
-from srtkabuki.sockopts import SRTO_SENDER
+from srtkabuki.srt_h import SRTO_SENDER
 
 
 def main():

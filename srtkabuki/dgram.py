@@ -56,7 +56,7 @@ def _onedgram(kabuki, buffer):
     """
     onedgram receive one datagram
     """
-    st = kabuki.recvmsg(buffer)
+    st = kabuki.recv(buffer)
     datagram = buffer.raw
     buffer = kabuki.mkbuff(BUFFSIZE)
     return datagram

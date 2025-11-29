@@ -15,7 +15,7 @@ from .srtkabuki import SRTKabuki
 
 
 PACKETSIZE = 188
-BUFFSIZE = 1316
+BUFFSIZE = 1456
 SYNC_BYTE = b"G"
 SPIN = True
 

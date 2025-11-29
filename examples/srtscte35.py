@@ -2,40 +2,13 @@
 
 import sys
 import time
-from srtkabuki import SRTKabuki
-from threefive import Stream, Cue
+from srtkabuki import SRTKabuki, datagramer
+from threefive import Stream
 
 
 PACKETSIZE = 188
-# set buffer to BUFFSIZE but send 1316 datagrams?
-# That's how it reads to me, and it seems to work best.
-BUFFSIZE = 1456
 SYNC_BYTE = b"G"
 SPIN = True
-
-
-def add_scte35_to_sidecar(scte35):
-    """
-    add_scte35_to_sidecar generates a sidecar file with the SCTE-35 Cues
-    """
-    pts = 0.001
-    with open("sidecar.txt", "a") as sidecar:
-        scte35.show()
-        if scte35.packet_data.pts:
-            pts = scte35.packet_data.pts
-        data = f"{pts},{scte35.encode()}\n"
-        sidecar.write(data)
-
-
-def parse_packet(packet, strm):
-    """
-    parse_packet check mpegts packet for scte35
-    """
-    if has_sync_byte(packet):
-        if at_least_a_packet(packet):
-            scte35 = check_for_scte35(packet)
-            if scte35:
-                add_scte35_to_sidecar(scte35)
 
 
 def has_sync_byte(stuff):
@@ -52,12 +25,50 @@ def at_least_a_packet(stuff):
     return len(stuff) >= PACKETSIZE
 
 
+def calculate_sidecar_pts(scte35):
+    """
+    calculate_sidecar_pts determine pts
+    for the sidecar file entry.
+    """
+    rollover = 95443.717678
+    pts = 0.001
+    if scte35.packet_data.pts:
+        pts = scte35.packet_data.pts
+    if scte35.command.pts_time:
+        pts = (scte35.command.pts_time + scte35.info_section.pts_adjustment) % rollover
+    return pts
+
+
+def add_scte35_to_sidecar(scte35):
+    """
+    add_scte35_to_sidecar
+    generates a sidecar file with the
+    SCTE-35 Cues
+    """
+    scte35.show()
+    pts = calculate_sidecar_pts(scte35)
+    data = f"{pts},{scte35.encode()}\n"
+    with open("sidecar.txt", "a") as sidecar:
+        sidecar.write(data)
+
+
 def check_for_scte35(packet):
     """
     check_for_scte35 parse a packet for SCTE-35
     """
     scte35 = strm._parse(packet)
     return scte35
+
+
+def parse_packet(packet, strm):
+    """
+    parse_packet check mpegts packet for scte35
+    """
+    if has_sync_byte(packet):
+        if at_least_a_packet(packet):
+            scte35 = check_for_scte35(packet)
+            if scte35:
+                add_scte35_to_sidecar(scte35)
 
 
 def packetize(datagram):
@@ -67,24 +78,20 @@ def packetize(datagram):
     return [datagram[i : i + PACKETSIZE] for i in range(0, len(datagram), PACKETSIZE)]
 
 
+def parse_packets(datagram,strm):
+    """
+    parse packets parse datagram packets.
+    """
+    _ = [parse_packet(packet, strm) for packet in packetize(datagram)]
+
+
 def parse_datagram(datagram, strm):
     """
-    parse_datagram split datagram into mpegts packets
+    parse_datagram test datagram and parse.
     """
     if at_least_a_packet(datagram):
         if has_sync_byte(datagram):
-            _ = [parse_packet(packet, strm) for packet in packetize(datagram)]
-
-
-def preflight():
-    """
-    preflight init SRTKabuki instance,
-    a buffer, and a threefive.Stream instance
-    """
-    kabuki = SRTKabuki(sys.argv[1])
-    kabuki.connect()
-    buffer = kabuki.mkbuff(BUFFSIZE)
-    return kabuki, buffer
+            parse_packets(datagram,strm)
 
 
 def spinner(lc):
@@ -100,20 +107,9 @@ def spinner(lc):
     return lc
 
 
-def datagramizer():
-
-    kabuki, buffer = preflight()
-    lc = 0
-    datagram = b""
-    while True:
-        st = kabuki.recv(buffer)
-        datagram = buffer.raw
-        lc = spinner(lc)
-        buffer = kabuki.mkbuff(BUFFSIZE)
-        yield datagram
-
-
 if __name__ == "__main__":
+    lc = 0
     strm = Stream(tsdata=None)
-    for datagram in datagramizer():
+    for datagram in datagramer(sys.argv[1]):
+        lc = spinner(lc)
         parse_datagram(datagram, strm)

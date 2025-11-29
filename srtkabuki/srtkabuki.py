@@ -389,7 +389,6 @@ class SRTKabuki:
         """
         new_val convert val into a ctypes type
         """
-        print("val", val)
         nval = None
         if isinstance(val, int):
             nval = ctypes.c_int(val)
@@ -403,7 +402,6 @@ class SRTKabuki:
             ),
         ):
             nval = self.mkmsg(val)
-        print("nval ", nval)
         return nval
 
     def setsockflag(self, flag, val):
@@ -412,11 +410,9 @@ class SRTKabuki:
 
         """
         nval = self.new_val(val)
-        print(nval)
         st = self.libsrt.srt_setsockflag(
             self.sock, flag, ctypes.byref(nval), ctypes.sizeof(nval)
         )
-        print(st)
         self.getlasterror()
 
     def congestion_control(self, algo):

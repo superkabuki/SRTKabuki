@@ -4,6 +4,7 @@
 ___
 
 ### NEWS
+* 11/28/2025 : __Fixed datagramer__, tested for 8 hours straight parsing SCTE35, __513 cues out of 513 cues parssed correctly__.
 * 11/25/2025 : __Release v0.0.1 is now available via pip__ _(..and the crowd goes wild!)_
 * 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 
 * 11/20/2025 : __SRTKabuki__ __is working__.
@@ -28,10 +29,8 @@ ___
 
 ## When is the release coming?
 
-<s>I'm fixing to get ready to start a release.
-__probably by Thanksgiving I will make a testing release__. </s>
-
-__v0.0.1 is out__ _(and a little buggy)_. I will sos a new build with fixes this weekend.
+I'm fixing to get ready to start a release.
+__v0.0.3 being released today__. 
 
 ___
 
@@ -86,7 +85,7 @@ ___
 
 * or run the the install-libsrt.sh script in this repo.
 
-##### Install SRTKabuki
+### Install SRTKabuki
 ```sh
 python3 -mpip install srtkabuki --break-system-packages
 ```
@@ -94,7 +93,7 @@ ___
 
 # Examples
 
-##### The smoketest from the libsrt docs.
+### The smoketest from the libsrt docs.
 
 * create the file livekabuki.py
 ```py3
@@ -107,11 +106,10 @@ from  srtkabuki import SRTKabuki
 kabuki = SRTKabuki(sys.argv[1]) # srt://127.0.0.1:9000
 kabuki.connect()
 buffsize=1456
-buffer = kabuki.mkbuff(buffsize)
 while True:
+    buffer = kabuki.mkbuff(buffsize)
     kabuki.recvmsg(buffer)
     sys.stdout.buffer.write(buffer.raw)
-    buffer = kabuki.mkbuff(buffsize)
 ```
 
 * In a terminal window run
@@ -135,7 +133,7 @@ python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
 ```
 ___
 
-##### parsing SCTE-35 from an srt stream with threefive
+### parsing SCTE-35 from an srt stream with threefive
 
 * install [threefive](https://github.com/superkabuki/SCTE35-Kabuki)
   ```py3
@@ -145,107 +143,96 @@ ___
 
 * threefive doesn't directly support srt, so datagramer reads the srt stream and passes data to threefive.
 
-
-```py3
-from srtkabuki import datagramer
-from threefive import Stream 
-
-PACKETSIZE=188
-
-def parseSCTE35(strm, datagram):
-"""
-parseSCTE35 split datagram into packets and
-pass to a threefive.Stream instance for parsing.
-"""
-_= [strm._parse(packet) for packet in
-    [datagram[i : i + PACKETSIZE]
-     for i in range(0, len(datagram), PACKETSIZE)]]
-
-
-if __name__=='__main__':
-    srt_url = 'srt://10.10.11.13:9000'
-    strm = Stream(tsdata=None) 
-    for datagram in datagramer(srt_url):
-        parseSCTE35(datagram, strm)
-```
-
-5) output
-```js
-a@fu:~/srt$ python3 srtscte35.py srt://127.0.0.1:4201
-127.0.0.1 4201
-startup: ✓
-ipv4int: ✓
-create_socket: ✓
-connect: ✓
-{\ 
-    "info_section": {
-        "table_id": "0xfc",
-        "section_syntax_indicator": false,
-        "private": false,
-        "sap_type": "0x03",
-        "sap_details": "No Sap Type",
-        "section_length": 67,
-        "protocol_version": 0,
-        "encrypted_packet": false,
-        "encryption_algorithm": 0,
-        "pts_adjustment": 2.3,
-        "cw_index": "0x00",
-        "tier": "0x0fff",
-        "splice_command_length": 20,
-        "splice_command_type": 5,
-        "descriptor_loop_length": 30,
-        "crc": "0x37b199ef"
-    },
-    "command": {
-        "command_length": 20,
-        "command_type": 5,
-        "name": "Splice Insert",
-        "time_specified_flag": true,
-        "pts_time": 72825.523933,
-        "break_auto_return": true,
-        "break_duration": 119.986533,
-        "splice_event_id": 1,
-        "splice_event_cancel_indicator": false,
-        "out_of_network_indicator": true,
-        "program_splice_flag": true,
-        "duration_flag": true,
-        "splice_immediate_flag": false,
-        "event_id_compliance_flag": true,
-        "unique_program_id": 39321,
-        "avail_num": 1,
-        "avails_expected": 1
-    },
-    "descriptors": [
-             {
-            "tag": 2,
-            "identifier": "CUEI",
-            "name": "Segmentation Descriptor",
-            "descriptor_length": 28,
-            "segmentation_event_cancel_indicator": false,
-            "segmentation_event_id": "0x00",
-            "segmentation_event_id_compliance_indicator": true,
-            "program_segmentation_flag": true,
-            "segmentation_duration_flag": true,
-            "delivery_not_restricted_flag": false,
-            "web_delivery_allowed_flag": false,
-            "no_regional_blackout_flag": false,
-            "archive_allowed_flag": false,
-            "device_restrictions": "Restrict Group 0",
-            "segmentation_duration": 120.0,
-            "segmentation_message": "Provider Placement Opportunity Start",
-            "segmentation_type_id": 52,
-            "segmentation_upid_length": 8,
-            "segmentation_upid_type": 1,
-            "segmentation_upid_type_name": "Type 0x01 is deprecated, use MPU type 0x0C",
-            "segmentation_upid": "10100000",
-            "segment_num": 0,
-            "segments_expected": 0
-        }
-    ]
-```
-
+* Run [srtscte35.py](examples/srtscte35.py)  in examples directory.
 ___
 
+### Using the SRTKabuki lib
+* If you just want to do a file transfer with SRTKabuki you can use the fetch method
+
+```py3
+#!/usr/bin/env python3
+
+import sys
+from srtkabuki import SRTKabuki
+
+srt_url = sys.argv[1]  # srt://example.com:9000
+remote_file = sys.argv[2]
+local_file = sys.argv[3]
+
+srtk = SRTKabuki(srt_url)
+srtk.fetch(remote_file, local_file)
+```
+* if you just want the raw datagrams off a live feed use the datagramer generator function
+* datagramer takes a srt_url as an arg, returns datagrams as bytes, payload size is 1316. 
+
+```py3
+import sys
+from srtkabuki import datagramer
+srt_url = sys.argv[1]  # srt://example.com:9000
+
+for datagram in datagramer:
+    your_parsing_function(datagram)
+```
+### Going low level
+* Most of libsrt is available in SRTKabuki, the ctypes conversions are handled for you.
+* If you've used sockets, this will all seem very similar.
+* One note, the socket is an optional arg in methods, it only needs to be used when a server accepts a socket connection. 
+* init SRTKabuki instance, just provide a srt_url
+* a socket is created for you, but not connected.
+* the srt_url sets host and port to bind for servers (0.0.0.0 works), and host and port to connect for clients 
+```py3
+from srtkabuki import SRTKabuki
+
+srtk = SRTKabki(srt_url)
+```
+* next you can set sock flags
+* All constants are in srtkabuki.srt_h
+```py3
+    from srtkabuki.srt_h import SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
+
+    kabuki.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
+    kabuki.setsockflag(SRTO_RCVSYN,1)
+    kabuki.setsockflag(SRTO_RCVBUF,32768)
+
+```
+* for clients call connect
+```py3
+kabuki.connect()
+```
+*  for servers call bind and listen
+```py3
+  kabuki.bind()
+  kabuki.listen()
+```
+* to accept a connection on a server
+```py3
+    fhandle = kabuki.accept() 
+```
+* to receive from a client
+* Note the socket is always the last arg
+```py3
+ smallbuff = kabuki.mkbuff(1456)
+ kabuki.recv(smallbuff, fhandle)
+```
+* If you need a buffer to receive into
+
+```py3
+  smallbuff = kabuki.mkbuff(1456)
+```
+* if you need to send data in a buffer
+
+```py3
+message = 'message can be strings, bytes, or ints'
+new_message= kabuki.mkmsg(message)
+```
+
+* to receive from a client
+* Note the socket is always the last arg
+
+```py3
+ smallbuff = kabuki.mkbuff(1456)
+ kabuki.recv(smallbuff, fhandle)
+```
 
 # Here's where I'm at so far.
 
@@ -378,23 +365,32 @@ class SRTKabuki(builtins.object)
  |  ----------------------------------------------------------------------
 ```
 
-## sockopts
+## srt_h
+
 ```py3
-Help on module sockopts:
 
-NAME
-    sockopts - sockopts.py
+    AF_INET = <AddressFamily.AF_INET: 2>
+    AI_PASSIVE = <AddressInfo.AI_PASSIVE: 1>
+    SOCK_DGRAM = <SocketKind.SOCK_DGRAM: 2>
+    SRTS_BROKEN = 6
+    SRTS_CLOSED = 8
+    SRTS_CLOSING = 7
+    SRTS_CONNECTED = 5
+    SRTS_CONNECTING = 4
+    SRTS_INIT = 1
+    SRTS_LISTENING = 3
+    SRTS_NONEXIST = 9
+    SRTS_OPENED = 2
+    SRT_DEFAULT_RECVFILE_BLOCK = 7200
+    SRT_ERROR = -1
+    SRT_FILE = 1
+    SRT_INVALID = 2
+    SRT_LIVE = 0
+    SRT_LIVE_DEF_LATENCY_MS = 120
+    SRT_LIVE_DEF_PLSIZE = 1316
+    SRT_LIVE_MAX_PLSIZE = 1456
 
-DESCRIPTION
-    these are the SRT socket options.
-    libsrt has them in an enum,
-    but I like being able to do
-    
-    from sockopts import  SRTO_RCVSYN
-    
-    it just seems more pythonic.
 
-DATA
 SRTO_MSS = 0  # the Maximum Transfer Unit
 SRTO_SNDSYN = 1  # if sending is blocking
 SRTO_RCVSYN = 2  # if receiving is blocking
@@ -458,40 +454,5 @@ SRTO_PACKETFILTER = 60  # Add and configure a packet filter
 SRTO_RETRANSMITALGO = 61  # An option to select packet retransmission algorithm
 SRTO_CRYPTOMODE = 62  # Encryption cipher mode (AES-CTR AES-GCM ...).
 SRTO_MAXREXMITBW = 63  # Maximum bandwidth limit for retransmision (Bytes/s)
-```
-## static
-```py3
-
-Help on module static:
-
-NAME
-    static
-
-DESCRIPTION
-    static.py
-    srt constants
-
-DATA
-    AF_INET = <AddressFamily.AF_INET: 2>
-    AI_PASSIVE = <AddressInfo.AI_PASSIVE: 1>
-    SOCK_DGRAM = <SocketKind.SOCK_DGRAM: 2>
-    SRTS_BROKEN = 6
-    SRTS_CLOSED = 8
-    SRTS_CLOSING = 7
-    SRTS_CONNECTED = 5
-    SRTS_CONNECTING = 4
-    SRTS_INIT = 1
-    SRTS_LISTENING = 3
-    SRTS_NONEXIST = 9
-    SRTS_OPENED = 2
-    SRT_DEFAULT_RECVFILE_BLOCK = 7200
-    SRT_ERROR = -1
-    SRT_FILE = 1
-    SRT_INVALID = 2
-    SRT_LIVE = 0
-    SRT_LIVE_DEF_LATENCY_MS = 120
-    SRT_LIVE_DEF_PLSIZE = 1316
-    SRT_LIVE_MAX_PLSIZE = 1456
-
 ```
 

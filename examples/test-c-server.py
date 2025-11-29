@@ -6,7 +6,7 @@ https://github.com/Haivision/srt/blob/master/examples/test-c-server.c
 import ctypes
 import sys
 from srtkabuki import SRTKabuki
-from srtkabuki.sockopts import SRTO_RCVSYN
+from srtkabuki.srt_h import SRTO_RCVSYN
 
 
 def main():

@@ -106,7 +106,7 @@ def datagramizer():
     lc = 0
     datagram = b""
     while True:
-        st = kabuki.recvmsg(buffer)
+        st = kabuki.recv(buffer)
         datagram = buffer.raw
         lc = spinner(lc)
         buffer = kabuki.mkbuff(BUFFSIZE)

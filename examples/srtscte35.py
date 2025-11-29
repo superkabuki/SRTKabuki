@@ -2,7 +2,7 @@
 
 import sys
 import time
-from srtkabuki import SRTKabuki, datagramer
+from srtkabuki import datagramer
 from threefive import Stream
 
 

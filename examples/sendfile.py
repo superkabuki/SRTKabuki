@@ -5,8 +5,8 @@ import time
 import socket
 from ctypes.util import find_library
 from srtkabuki import SRTKabuki
-from srtkabuki.sockopts import SRTO_TRANSTYPE
-from srtkabuki.static import SRT_FILE
+from srtkabuki.srt_h import SRTO_TRANSTYPE
+from srtkabuki.srt_h import SRT_FILE
 
 
 def send_a_file(srtk):

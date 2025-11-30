@@ -12,8 +12,8 @@ import socket
 import inspect
 
 
-from .srt_h import SRT_DEFAULT_RECVFILE_BLOCK, SRT_LIVE, SRT_FILE
-from .srt_h import SRTO_TRANSTYPE, SRTO_CONGESTION
+from . import SRT_DEFAULT_RECVFILE_BLOCK, SRT_LIVE, SRT_FILE
+from . import SRTO_TRANSTYPE, SRTO_CONGESTION
 
 # Socket Address structures
 

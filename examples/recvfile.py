@@ -6,11 +6,10 @@ https://github.com/Haivision/srt/blob/master/examples/recvfile.cpp
 """
 
 import sys
-from srtfu import SRTfu
+from srtfu import fetch
 
 srt_url = sys.argv[1]  # srt://example.com:9000
 remote_file = sys.argv[2]
 local_file = sys.argv[3]
 
-srtk = SRTfu(srt_url)
-srtk.fetch(remote_file, local_file)
+fetch(srt_url , remote_file, local_file)

@@ -6,22 +6,22 @@ https://github.com/Haivision/srt/blob/master/examples/test-c-client.c
 import sys
 import time
 from srtfu import SRTfu
-from srtfu.srt_h import SRTO_SENDER
+from srtfu import SRTO_SENDER
 
 
 def main():
     srt_url = sys.argv[1]  # srt://example.com:9000
-    srtk = SRTfu(srt_url)
-    srtk.setsockflag(SRTO_SENDER, 1)
-    srtk.connect()
+    srtf = SRTfu(srt_url)
+    srtf.setsockflag(SRTO_SENDER, 1)
+    srtf.connect()
     a = 100
     while a:
         a -= 1
-        srtk.sendmsg2(b"I am super cool")
+        srtf.sendmsg2(b"I am super cool")
         time.sleep(0.01)
     time.sleep(1)
-    srtk.close()
-    srtk.cleanup()
+    srtf.close()
+    srtf.cleanup()
 
 
 main()

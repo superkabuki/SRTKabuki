@@ -6,6 +6,7 @@
 ___
 
 ### NEWS
+* 11/29/2025 : __Renaming project to SRTfu__, SRTKabuki does not work well with search engines and seems to confuse googles Ai thing.
 * 11/28/2025 : __Fixed datagramer__, tested for 8 hours straight parsing SCTE35, __513 cues out of 513 cues parssed correctly__.
 * 11/25/2025 : __Release v0.0.1 is now available via pip__ _(..and the crowd goes wild!)_
 * 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 

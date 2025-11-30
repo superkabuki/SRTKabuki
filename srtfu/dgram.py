@@ -11,7 +11,7 @@ Home of the datagramer function.
 import sys
 import time
 from .srtfu import SRTfu
-from .srt_h import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF
+from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF
 
 
 PACKETSIZE = 188

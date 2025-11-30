@@ -81,11 +81,11 @@ ___
 ### Install 
 ##### Install libsrt
 
-*if you have libsrt already installed, you can skip this step
+* __if you have libsrt already installed, you can skip this step__
 
 * Check if your os has a libsrt package and install it. SRTfu is built with libsrt v1.5.5.
 
-* or run the the install-libsrt.sh script in this repo.
+* or run the the __install-libsrt.sh__ script in this repo.
 
 ### Install SRTfu
 ```sh

@@ -102,13 +102,15 @@ class SRTfu:
     SRTfu Pythonic Secure Reliable Transport
     """
 
-    def __init__(self, srturl):
+    def __init__(self, srturl, flags=None):
         self.addr, self.port, self.path, self.args = self.split_url(srturl)
         self.getaddrinfo, self.freeaddrinfo = self.load_libc()
         self.libsrt = self.load_srt()
         self.startup()
         self.sa_ptr, self.sa_size = self.mk_sockaddr_ptr(self.addr, self.port)
         self.sock = self.create_socket()
+        if flags:
+            self.setflags(flags)
         self.peer_addr = None
         self.peer_addr_size = None
         self.peer_sock = None
@@ -201,12 +203,33 @@ class SRTfu:
     def create_socket(self):
         """
         create_socket srt_create_socket
-
         """
         self.libsrt.srt_create_socket.restype = ctypes.c_int
         ss = self.libsrt.srt_create_socket()
         self.getlasterror()
         return ss
+
+    def congestion_control(self, algo):
+        """
+        congestion_control set the congestion control
+        algorithm. can also be set with livecc() and filecc()
+        methods.
+        """
+        self.setsockflag(SRTO_CONGESTION, algo)
+
+    def conlive(self):
+        """
+        conlive set congestion control to live
+        """
+        self.congestion_control("live")
+        self.getlasterror()
+
+    def confile(self):
+        """
+        confile set congestion control to file
+        """
+        self.congestion_control("file")
+        self.getlasterror()
 
     def epoll_create(self):
         """
@@ -246,7 +269,6 @@ class SRTfu:
     def getlasterror(self):
         """
         getlasterror srt_getlasterror_str
-
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
@@ -281,12 +303,72 @@ class SRTfu:
         )
         self.getlasterror()
 
+    def ipv4int(self, addr):
+        """
+        take a ipv4 string addr and make it an int
+        """
+        sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
+        self.getlasterror()
+        return sa
+
     def listen(self):
         """
         listen srt_listen
         """
         self.libsrt.srt_listen(self.sock, 2)
         self.getlasterror()
+
+    def mk_sockaddr_ptr(self, addr, port):
+        """
+        mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
+        """
+        sa_in = sockaddr_in()
+        sa_in.sin_family = socket.AF_INET
+        sa_in.sin_port = socket.htons(port)
+        sa_in.sin_addr.s_addr = self.ipv4int(addr)
+        # Get a pointer to sa_in
+        sa_in_ptr = ctypes.pointer(sa_in)
+        #  (struct sockaddr*)&sa
+        return ctypes.cast(sa_in_ptr, ctypes.POINTER(sockaddr)), ctypes.sizeof(sa_in)
+
+    def mkbuff(self, buffsize, data=b""):
+        """
+        mkbuff make a c  buffer
+        to read into when receiving data.
+        """
+        return ctypes.create_string_buffer(data, buffsize)
+
+    def mkmsg(self, msg):
+        """
+        mkmsg convert python byte string
+        to a C string buffer when sending data
+        """
+        if not isinstance(msg, (bytes, str)):
+            msg = str(msg)
+        if isinstance(msg, str):
+            msg = msg.encode("utf8")
+        if not isinstance(msg, bytes):
+            msg = b"Message needs to be bytes"
+        return self.mkbuff(len(msg), msg)
+
+    def new_val(self, val):
+        """
+        new_val convert val into a ctypes type
+        """
+        nval = None
+        if isinstance(val, int):
+            nval = ctypes.c_int(val)
+        if isinstance(val, bool):
+            nval = ctypes.c_bool(val)
+        if isinstance(
+            val,
+            (
+                str,
+                bytes,
+            ),
+        ):
+            nval = self.mkmsg(val)
+        return nval
 
     def recv(self, buffer, sock=None):
         """
@@ -314,26 +396,6 @@ class SRTfu:
         self.getlasterror()
         print("recvsize", recvsize)
         return recvsize
-
-    def mkbuff(self, buffsize, data=b""):
-        """
-        mkbuff make a c  buffer
-        to read into when receiving data.
-        """
-        return ctypes.create_string_buffer(data, buffsize)
-
-    def mkmsg(self, msg):
-        """
-        mkmsg convert python byte string
-        to a C string buffer when sending data
-        """
-        if not isinstance(msg, (bytes, str)):
-            msg = str(msg)
-        if isinstance(msg, str):
-            msg = msg.encode("utf8")
-        if not isinstance(msg, bytes):
-            msg = b"Message needs to be bytes"
-        return self.mkbuff(len(msg), msg)
 
     def recvmsg(self, buffer, sock=None):
         """
@@ -383,25 +445,6 @@ class SRTfu:
         self.getlasterror()
         time.sleep(0.001)
 
-    def new_val(self, val):
-        """
-        new_val convert val into a ctypes type
-        """
-        nval = None
-        if isinstance(val, int):
-            nval = ctypes.c_int(val)
-        if isinstance(val, bool):
-            nval = ctypes.c_bool(val)
-        if isinstance(
-            val,
-            (
-                str,
-                bytes,
-            ),
-        ):
-            nval = self.mkmsg(val)
-        return nval
-
     def setsockflag(self, flag, val):
         """
         setsockflag  srt_setsockflag
@@ -413,27 +456,17 @@ class SRTfu:
         )
         self.getlasterror()
 
-    def congestion_control(self, algo):
+    def setflags(self, flags):
         """
-        congestion_control set the congestion control
-        algorithm. can also be set with livecc() and filecc()
-        methods.
-        """
-        self.setsockflag(SRTO_CONGESTION, algo)
+        setflags set flags on an SRTfu instance
 
-    def livecc(self):
+        flags  a dict of socket flags you want to have set.
+                   ex. {SRTO_TRANSTYPE: SRT_LIVE,
+                           SRTO_RCVSYN: 1, }
         """
-        livecc set congestion control to live
-        """
-        self.congestion_control("live")
-        self.getlasterror()
-
-    def filecc(self):
-        """
-        filecc set congestion control to file
-        """
-        self.congestion_control("file")
-        self.getlasterror()
+        for k, v in flags.items():
+            self.setsockflag(k, v)
+            self.getlasterror()
 
     def startup(self):
         """
@@ -444,37 +477,16 @@ class SRTfu:
 
     # helper methods not in libsrt
 
-    def ipv4int(self, addr):
-        """
-        take a ipv4 string addr and make it an int
-        """
-        sa = int.from_bytes(socket.inet_pton(socket.AF_INET, addr), byteorder="little")
-        self.getlasterror()
-        return sa
-
-    def mk_sockaddr_ptr(self, addr, port):
-        """
-        mk_sockaddr_sa make a c compatible (struct sockaddr*)&sa
-        """
-        sa_in = sockaddr_in()
-        sa_in.sin_family = socket.AF_INET
-        sa_in.sin_port = socket.htons(port)
-        sa_in.sin_addr.s_addr = self.ipv4int(addr)
-        # Get a pointer to sa_in
-        sa_in_ptr = ctypes.pointer(sa_in)
-        #  (struct sockaddr*)&sa
-        return ctypes.cast(sa_in_ptr, ctypes.POINTER(sockaddr)), ctypes.sizeof(sa_in)
-
     def remote_file_size(self):
         buffer_size = 20
         buffer = self.mkbuff(buffer_size)
         self.recv(buffer)
-     #   print("buffer.value ", buffer.value)
+        print("buffer.value ", buffer.value)
         try:
             file_size = int(buffer.value.decode())
         except:
             file_size = 0
-       # print("remote file size", file_size)
+        print("remote file size", file_size)
         self.getlasterror()
         return file_size
 
@@ -501,7 +513,6 @@ class SRTfu:
         fetch fetch remote_file fron host on port
         and save it as local_file
         """
-
         self.setsockflag(SRTO_TRANSTYPE, SRT_FILE)
         self.connect()
         self.request_file(remote_file)

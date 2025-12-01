@@ -9,7 +9,7 @@ from srtfu import SRTO_TRANSTYPE
 from srtfu import SRT_FILE
 
 
-def send_a_file(srtk):
+def send_a_file(srtf):
     """
     send_a_file accept a connection,
     read filename size from socket,
@@ -22,7 +22,7 @@ def send_a_file(srtk):
     srtf.getsockstate(fhandle)
     print(f"Accepted new connection (socket ID: {fhandle})...")
     smallbuff = srtf.mkbuff(1316)
-    srtf.recv(smallbuff, fhandle)
+    srtf.recvmsg(smallbuff, fhandle)
     filenamesize = int.from_bytes(smallbuff.value, byteorder="little")
     print("filenamesize ", filenamesize)
     fbuff = srtf.mkbuff(filenamesize)

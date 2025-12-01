@@ -34,15 +34,20 @@ ___
 and to do so with just a few lines of code.
 <BR> 
 ___
+# Docs
+
 * [Install](#install)
 * [Usage](#usage)  
   * [fetch](#fetch) - file transfer
-  * [datagramer][#datagramer) - parsing video streams
+  * [datagramer](#datagramer) - parsing video streams
   * [smoketest](#smoketest) - sthe moketest from libsrt in srtfu.
   * [SCTE35](#scte35) - parse scte35 from srt
   * [low level](#low-level) - using the SRTfu class.
-  * [socket flags](#socket-options)
+  * [SRTfu](#srtfu) -all the SRTfu methods
+  * [socket flags](#socket-flags) - SRT uses a lot of socket flags.
   * 
+___
+
 ### Install 
 ##### Install libsrt
 
@@ -360,7 +365,7 @@ class SRTfu(builtins.object)
 ```
 
 
-# Socket Options 
+# Socket Flags 
 * Note: these are the flag number for the socket, not the value of the flag.
 ```py3
 SRTO_MSS = 0  # the Maximum Transfer Unit

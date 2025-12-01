@@ -4,6 +4,7 @@ srtfu.__init__.py
 socket flags and assorted constants included here.
 
 """
+
 import socket
 
 
@@ -44,9 +45,6 @@ libsrt has them in an enum,
 but I like being able to do
 
 from srtfu import  SRTO_RCVSYN
-
-it just seems more pythonic.
-
 """
 
 SRTO_MSS = 0  # the Maximum Transfer Unit
@@ -92,9 +90,9 @@ SRTO_SNDKMSTATE = 40  # (GET) the current state of the encryption at the peer si
 SRTO_RCVKMSTATE = 41  # (GET) the current state of the encryption at the agent side
 SRTO_LOSSMAXTTL = 42  # Maximum possible packet reorder tolerance (number of packets to receive after loss to send lossreport)
 SRTO_RCVLATENCY = 43  # TsbPd receiver delay (mSec) to absorb burst of missed packet retransmission
-SRTO_PEERLATENCY =  44  # Minimum value of the TsbPd receiver delay (mSec) for the opposite side (peer)
+SRTO_PEERLATENCY = 44  # Minimum value of the TsbPd receiver delay (mSec) for the opposite side (peer)
 SRTO_MINVERSION = 45  # Minimum SRT version needed for the peer (peers with less version will get connection reject)
-SRTO_STREAMID =  46  # A string set to a socket and passed to the listener's accepted socket
+SRTO_STREAMID = 46  # A string set to a socket and passed to the listener's accepted socket
 SRTO_CONGESTION = 47  # Congestion controller type selection
 SRTO_MESSAGEAPI = 48  # In File mode use message API (portions of data with boundaries)
 SRTO_PAYLOADSIZE = 49  # Maximum payload size sent in one UDP packet (0 if unlimited)
@@ -117,5 +115,3 @@ SRTO_MAXREXMITBW = 63  # Maximum bandwidth limit for retransmision (Bytes/s)
 
 from .srtfu import SRTfu
 from .funcs import datagramer, fetch
-
-

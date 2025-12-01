@@ -34,6 +34,15 @@ ___
 and to do so with just a few lines of code.
 <BR> 
 ___
+* [Install](#install)
+* [Usage](#usage)  
+  * [fetch](#fetch) - file transfer
+  * [datagramer][#datagramer) - parsing video streams
+  * [smoketest](#smoketest) - sthe moketest from libsrt in srtfu.
+  * [SCTE35](#scte35) - parse scte35 from srt
+  * [low level](#low-level) - using the SRTfu class.
+  * [socket flags](#socket-options)
+  * 
 ### Install 
 ##### Install libsrt
 
@@ -51,7 +60,7 @@ ___
 
 
 
-### Using the SRTfu lib
+# Usage
 
 * srtfu is meant be easy to use.
 * use __fetch__ to retrieve files over srt. Use [datagramer](#datagramer) to parse live streams.
@@ -101,7 +110,7 @@ for datagram in datagramer(srt_url):
 
 ___
 
-
+# smoketest
 ### The smoketest from the libsrt docs.
 
 * create the file livekabuki.py
@@ -138,6 +147,8 @@ python3 livekabuki.py srt://127.0.0.1:4201 | ffplay -
 ```
 ___
 
+# SCTE35
+
 ### parsing SCTE-35 from an srt stream with threefive
 
 * install [threefive](https://github.com/superkabuki/SCTE35-Kabuki)
@@ -152,7 +163,7 @@ ___
 ___
 
 
-### Going low level
+# low level
 * Most of libsrt is available in SRTfu, the ctypes conversions are handled for you.
 * If you've used sockets, this will all seem very similar.
 * One note, the socket is an optional arg in methods, it only needs to be used when a server accepts a socket connection. 
@@ -215,16 +226,16 @@ new_message= srtf.mkmsg(message)
 ## SRTfu
 
 ```py3
-Help on class SRTfu in module srtfu:
+Help on class SRTfu in module srtfu.srtfu:
 
 class SRTfu(builtins.object)
- |  SRTfu(srturl)
+ |  SRTfu(srturl, flags=None)
  |  
  |  SRTfu Pythonic Secure Reliable Transport
  |  
  |  Methods defined here:
  |  
- |  __init__(self, srturl)
+ |  __init__(self, srturl, flags=None)
  |  
  |  accept(self)
  |      accept srt_accept
@@ -241,10 +252,16 @@ class SRTfu(builtins.object)
  |  close(self, sock=None)
  |      close srt_close
  |  
+ |  confile(self)
+ |      confile set congestion control to file
+ |  
  |  congestion_control(self, algo)
  |      congestion_control set the congestion control
  |      algorithm. can also be set with livecc() and filecc()
  |      methods.
+ |  
+ |  conlive(self)
+ |      conlive set congestion control to live
  |  
  |  connect(self)
  |      connect srt_connect
@@ -265,9 +282,6 @@ class SRTfu(builtins.object)
  |      fetch fetch remote_file fron host on port
  |      and save it as local_file
  |  
- |  filecc(self)
- |      filecc set congestion control to file
- |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
  |  
@@ -279,9 +293,6 @@ class SRTfu(builtins.object)
  |  
  |  listen(self)
  |      listen srt_listen
- |  
- |  livecc(self)
- |      livecc set congestion control to live
  |  
  |  load_libc(self)
  |      load_libc load getaddrinfo and freeaddrinfo from libc.so
@@ -301,7 +312,7 @@ class SRTfu(builtins.object)
  |      to a C string buffer when sending data
  |  
  |  new_val(self, val)
- |     new_val convert val into a ctypes type
+ |      new_val convert val into a ctypes type
  |  
  |  recv(self, buffer, sock=None)
  |      recv srt_recv
@@ -311,7 +322,7 @@ class SRTfu(builtins.object)
  |  
  |  recvmsg(self, buffer, sock=None)
  |      recvmsg srt_recvmsg
- |  
+ |   
  |  remote_file_size(self)
  |  
  |  request_file(self, remote_file)
@@ -326,6 +337,13 @@ class SRTfu(builtins.object)
  |  sendmsg2(self, msg, sock=None)
  |      sendmsg2 srt_sendmsg2
  |  
+ |  setflags(self, flags)
+ |      setflags set flags on an SRTfu instance
+ |      
+ |      flags  a dict of socket flags you want to have set.
+ |                 ex. {SRTO_TRANSTYPE: SRT_LIVE,
+ |                         SRTO_RCVSYN: 1, }
+ |  
  |  setsockflag(self, flag, val)
  |      setsockflag  srt_setsockflag
  |  
@@ -337,8 +355,8 @@ class SRTfu(builtins.object)
  |  
  |  split_url(url)
  |      split_url, split srt url into addr,port, path and args
- |  
  |  ----------------------------------------------------------------------
+
 ```
 
 

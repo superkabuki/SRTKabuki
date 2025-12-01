@@ -23,7 +23,7 @@ def _setflags(srtf, flags):
                ex. {SRTO_TRANSTYPE: SRT_LIVE,
                        SRTO_RCVSYN: 1, }
     """
-    for k,v in flags:
+    for k,v in flags.items():
         srtf.setsockflag(k,v)
 
 

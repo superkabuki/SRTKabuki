@@ -100,27 +100,6 @@ for datagram in datagramer(srt_url):
 
 ___
 
-### flags?
-
-* the flags argument is there in case you need to add a socket flag, in srt there are lots of socket flags, but I have found that setting extra flags is a great way to tie yourself in a knot.
-
-* srtfu defines all the srt socket flags and they can be imported directly from srtfu
-
-* The needed flags will be set for you, but If you have to use an additional flag, do it like this
-
-```py3
-
-from srtfu import SRTO_TRANSTYPE, SRT_LIVE, SRTO_RCVSYN
-
-flags = {SRTO_TRANSTYPE: SRT_LIVE,
-        SRTO_RCVSYN: 1, }
-
-```
-
-* If you want to know what they are and what they do  [libsrt](https://github.com/Haivision/srt)
-
-___
-
 
 ### The smoketest from the libsrt docs.
 
@@ -129,16 +108,12 @@ ___
 #!/usr/bin/env python3
 
 import sys
-from  srtfu import SRTfu
+from  srtfu import datagramer
 
+srt_url = sys.argv[1]
+for datagram in datagramer(srt_url):
+    sys.stdout.buffer.write(datagram)
 
-srtf = SRTfu(sys.argv[1]) # srt://127.0.0.1:9000
-srtf.connect()
-buffsize=1456
-while True:
-    buffer = srtf.mkbuff(buffsize)
-    srtf.recvmsg(buffer)
-    sys.stdout.buffer.write(buffer.raw)
 ```
 
 * In a terminal window run
@@ -366,7 +341,8 @@ class SRTfu(builtins.object)
 ```
 
 
-# Socket Options
+# Socket Options 
+* Note: these are the flag number for the socket, not the value of the flag.
 ```py3
 SRTO_MSS = 0  # the Maximum Transfer Unit
 SRTO_SNDSYN = 1  # if sending is blocking

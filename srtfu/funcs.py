@@ -7,24 +7,11 @@ Home of the fetch and datagramer functions.
 import sys
 import time
 from .srtfu import SRTfu
-from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF, SRT_LIVE, SRT_FILE
+from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF, SRT_LIVE
 
 
 PACKETSIZE = 188
 BUFFSIZE = 1456
-
-
-def _setflags(srtf, flags):
-    """
-    _setflags set flags on an SRTfu instance
-
-    srtf SRTfu instance
-    flags  a dict of socket flags you want to have set.
-               ex. {SRTO_TRANSTYPE: SRT_LIVE,
-                       SRTO_RCVSYN: 1, }
-    """
-    for k,v in flags.items():
-        srtf.setsockflag(k,v)
 
 
 def _preflight(srt_url, flags=None):
@@ -32,9 +19,7 @@ def _preflight(srt_url, flags=None):
     preflight init SRTfu instance,
     and set sock flags as desired.
     """
-    srtf= SRTfu(srt_url)
-    if flags:
-        _setflags(srtf, flags)
+    srtf= SRTfu(srt_url,flags)
     srtf.connect()
     return srtf
 
@@ -47,7 +32,7 @@ def datagramer(srt_url,flags=None):
     """
     preflags ={SRTO_TRANSTYPE: SRT_LIVE,
                        SRTO_RCVSYN: 1,
-                       SRTO_RCVBUF: 32768,}
+                       SRTO_RCVBUF: 32768000,}
     if flags:
         preflags.update(flags)
     srtf = _preflight(srt_url,preflags)
@@ -56,7 +41,6 @@ def datagramer(srt_url,flags=None):
         st = srtf.recv(buffer)
         datagram = buffer.raw
         yield datagram
-
 
 
 def fetch(srt_url, remote_file,local_file, flags=None):
@@ -71,7 +55,5 @@ def fetch(srt_url, remote_file,local_file, flags=None):
                ex. {SRTO_TRANSTYPE: SRT_LIVE,
                        SRTO_RCVSYN: 1, }
     """
-
-        
-    srtf = SRTfu(srt_url)
+    srtf = SRTfu(srt_url,flags)
     srtf.fetch(remote_file, local_file)

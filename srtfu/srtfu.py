@@ -469,12 +469,12 @@ class SRTfu:
         buffer_size = 20
         buffer = self.mkbuff(buffer_size)
         self.recv(buffer)
-        print("buffer.value ", buffer.value)
+     #   print("buffer.value ", buffer.value)
         try:
             file_size = int(buffer.value.decode())
         except:
             file_size = 0
-        print("remote file size", file_size)
+       # print("remote file size", file_size)
         self.getlasterror()
         return file_size
 

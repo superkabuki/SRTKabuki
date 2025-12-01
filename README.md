@@ -33,56 +33,6 @@ ___
 and to do so with just a few lines of code.
 <BR> 
 ___
-
-## When is the release coming?
-
-I'm fixing to get ready to start a release.
-__v0.0.3 being released today__. 
-
-___
-
-## Supported Operating Systems
-* __POSIX__ systems ( UNIX, Linux)
-* Tested on __OpenBSD and Debian Sid__. 
-* __If you can install libsrt__ in your environment, __SRTfu should work just fine.__
-* __I don't know Windows well enough to support it__, but I will accept Windows specific patches if needed.
-
-___
-
-### SRTfu is classy.
-* SRTfu is a python class that implements SRT. <BR>
-* Start with
-```py3
-from srtfu import SRTfu
-
-srtk = SRTfu(srt_url) # srt://1.2.3.4:9000
-
-```
-* method names map to srt_function names _(ex. SRTfu.connect is libsrt.srt_connect)_
-
-### Well most of the time it's classy
-* For parsing raw live srt streams you can use the datagramer generator function
-
-```py3
-from srtfu import datagramer  
-
-srt_url = 'srt://10.10.11.13:9000'
-
-for datagram in datagramer(srt_url):
-    your_datagram_parser(datagram)
-```
-
-### SRTfu is fast.
-* since it calls libsrt C functions, SRTfu runs at C speed.
-___ 
-###  Get invovled or go away.
-__If you use open source, contribute to open source.__<BR>
-
-If you are interested in using SRT from python, come work on it with me..<BR>
-You don't need to be a master of python, there's stuff to do besides just writing code.<BR>
-
-___
-
 ### Install 
 ##### Install libsrt
 
@@ -98,7 +48,79 @@ python3 -mpip install srtfu --break-system-packages
 ```
 ___
 
-# Examples
+
+
+### Using the SRTfu lib
+
+* srtfu is meant be easy to use.
+* use __fetch__ to retrieve files over srt. Use [datagramer](#datagramer) to parse live streams.
+* All other functionality is built into the __srtfu.SRTfu__ class
+
+# fetch
+If you just want to retrieve files over SRT, use the fetch function. 
+
+```py3
+ fetch(srt_url , remote_file, local_file, flags=None)
+```
+
+* Complete working example
+
+```py3
+from srtfu import fetch
+
+srt_url = srt://206.170.125.43:9000
+remote_file = /home/a/video.ts
+local_file = video.ts
+
+fetch(srt_url , remote_file, local_file)
+```
+___
+
+# datagramer
+Use the __datagramer__ function to parse an srt stream.
+
+```py3
+datagramer(srt_url,flags=None)
+
+```
+* datagramer takes an srt_url as an arg and returns a generator of raw datagram payloads.
+
+* Complete working example
+
+```py3
+import sys
+from srtfu import datagramer
+
+srt_url = srt://10.0.0.1:9000
+
+for datagram in datagramer(srt_url):
+    sys.stdout.buffer.write(datagram)
+```
+* if you want to see a more complete example, [srtscte35.py](https://github.com/superkabuki/SRTfu/blob/main/examples/srtscte35.py)
+
+___
+
+### flags?
+
+* the flags argument is there in case you need to add a socket flag, in srt there are lots of socket flags, but I have found that setting extra flags is a great way to tie yourself in a knot.
+
+* srtfu defines all the srt socket flags and they can be imported directly from srtfu
+
+* The needed flags will be set for you, but If you have to use an additional flag, do it like this
+
+```py3
+
+from srtfu import SRTO_TRANSTYPE, SRT_LIVE, SRTO_RCVSYN
+
+flags = {SRTO_TRANSTYPE: SRT_LIVE,
+        SRTO_RCVSYN: 1, }
+
+```
+
+* If you want to know what they are and what they do  [libsrt](https://github.com/Haivision/srt)
+
+___
+
 
 ### The smoketest from the libsrt docs.
 
@@ -110,12 +132,12 @@ import sys
 from  srtfu import SRTfu
 
 
-kabuki = SRTfu(sys.argv[1]) # srt://127.0.0.1:9000
-kabuki.connect()
+srtf = SRTfu(sys.argv[1]) # srt://127.0.0.1:9000
+srtf.connect()
 buffsize=1456
 while True:
-    buffer = kabuki.mkbuff(buffsize)
-    kabuki.recvmsg(buffer)
+    buffer = srtf.mkbuff(buffsize)
+    srtf.recvmsg(buffer)
     sys.stdout.buffer.write(buffer.raw)
 ```
 
@@ -153,33 +175,7 @@ ___
 * Run [srtscte35.py](examples/srtscte35.py)  in examples directory.
 ___
 
-### Using the SRTfu lib
-* If you just want to do a file transfer with SRTfu you can use the fetch method
 
-```py3
-#!/usr/bin/env python3
-
-import sys
-from srtfu import SRTfu
-
-srt_url = sys.argv[1]  # srt://example.com:9000
-remote_file = sys.argv[2]
-local_file = sys.argv[3]
-
-srtk = SRTfu(srt_url)
-srtk.fetch(remote_file, local_file)
-```
-* if you just want the raw datagrams off a live feed use the datagramer generator function
-* datagramer takes a srt_url as an arg, returns datagrams as bytes, payload size is 1316. 
-
-```py3
-import sys
-from srtfu import datagramer
-srt_url = sys.argv[1]  # srt://example.com:9000
-
-for datagram in datagramer:
-    your_parsing_function(datagram)
-```
 ### Going low level
 * Most of libsrt is available in SRTfu, the ctypes conversions are handled for you.
 * If you've used sockets, this will all seem very similar.
@@ -190,58 +186,55 @@ for datagram in datagramer:
 ```py3
 from srtfu import SRTfu
 
-srtk = SRTKabki(srt_url)
+srtf = SRTfu(srt_url)
 ```
 * next you can set sock flags
-* All constants are in srtfu.srt_h
 ```py3
-    from srtfu.srt_h import SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
+    from srtfu import SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
 
-    kabuki.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
-    kabuki.setsockflag(SRTO_RCVSYN,1)
-    kabuki.setsockflag(SRTO_RCVBUF,32768)
+    srtf.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
+    srtf.setsockflag(SRTO_RCVSYN,1)
+    srtf.setsockflag(SRTO_RCVBUF,32768)
 
 ```
 * for clients call connect
 ```py3
-kabuki.connect()
+srtf.connect()
 ```
 *  for servers call bind and listen
 ```py3
-  kabuki.bind()
-  kabuki.listen()
+  srtf.bind()
+  srtf.listen()
 ```
 * to accept a connection on a server
 ```py3
-    fhandle = kabuki.accept() 
+    fhandle = srtf.accept() 
 ```
 * to receive from a client
 * Note the socket is always the last arg
 ```py3
- smallbuff = kabuki.mkbuff(1456)
- kabuki.recv(smallbuff, fhandle)
+ smallbuff = srtf.mkbuff(1456)
+ srtf.recv(smallbuff, fhandle)
 ```
 * If you need a buffer to receive into
 
 ```py3
-  smallbuff = kabuki.mkbuff(1456)
+  smallbuff = srtf.mkbuff(1456)
 ```
 * if you need to send data in a buffer
 
 ```py3
 message = 'message can be strings, bytes, or ints'
-new_message= kabuki.mkmsg(message)
+new_message= srtf.mkmsg(message)
 ```
 
 * to receive from a client
 * Note the socket is always the last arg
 
 ```py3
- smallbuff = kabuki.mkbuff(1456)
- kabuki.recv(smallbuff, fhandle)
+ smallbuff = srtf.mkbuff(1456)
+ srtf.recv(smallbuff, fhandle)
 ```
-
-# Here's where I'm at so far.
 
 ## SRTfu
 
@@ -372,32 +365,9 @@ class SRTfu(builtins.object)
  |  ----------------------------------------------------------------------
 ```
 
-## srt_h
 
+# Socket Options
 ```py3
-
-    AF_INET = <AddressFamily.AF_INET: 2>
-    AI_PASSIVE = <AddressInfo.AI_PASSIVE: 1>
-    SOCK_DGRAM = <SocketKind.SOCK_DGRAM: 2>
-    SRTS_BROKEN = 6
-    SRTS_CLOSED = 8
-    SRTS_CLOSING = 7
-    SRTS_CONNECTED = 5
-    SRTS_CONNECTING = 4
-    SRTS_INIT = 1
-    SRTS_LISTENING = 3
-    SRTS_NONEXIST = 9
-    SRTS_OPENED = 2
-    SRT_DEFAULT_RECVFILE_BLOCK = 7200
-    SRT_ERROR = -1
-    SRT_FILE = 1
-    SRT_INVALID = 2
-    SRT_LIVE = 0
-    SRT_LIVE_DEF_LATENCY_MS = 120
-    SRT_LIVE_DEF_PLSIZE = 1316
-    SRT_LIVE_MAX_PLSIZE = 1456
-
-
 SRTO_MSS = 0  # the Maximum Transfer Unit
 SRTO_SNDSYN = 1  # if sending is blocking
 SRTO_RCVSYN = 2  # if receiving is blocking

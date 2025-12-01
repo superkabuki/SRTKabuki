@@ -9,6 +9,7 @@
 ___
 
 ### NEWS
+* 12/01/2025 : __Release v0.0.5__ aka _'everything is working?'_
 * 11/29/2025 : __Renaming project to SRTfu__, SRTKabuki does not work well with search engines.
 * 11/29/2025 : Released __v0.0.3__
 * 11/28/2025 : __Fixed datagramer__, tested for 8 hours straight parsing SCTE35, __513 cues out of 513 cues parssed correctly__.

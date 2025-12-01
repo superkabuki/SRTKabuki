@@ -7,7 +7,7 @@ Home of the fetch and datagramer functions.
 import sys
 import time
 from .srtfu import SRTfu
-from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF, SRT_LIVE
+from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF, SRT_LIVE, SRT_FILE
 
 
 PACKETSIZE = 188
@@ -27,13 +27,14 @@ def _setflags(srtf, flags):
         srtf.setsockflag(k,v)
 
 
-def _preflight(srt_url, flags):
+def _preflight(srt_url, flags=None):
     """
     preflight init SRTfu instance,
     and set sock flags as desired.
     """
     srtf= SRTfu(srt_url)
-    _setflags(srtf, flags)
+    if flags:
+        _setflags(srtf, flags)
     srtf.connect()
     return srtf
 
@@ -70,8 +71,7 @@ def fetch(srt_url, remote_file,local_file, flags=None):
                ex. {SRTO_TRANSTYPE: SRT_LIVE,
                        SRTO_RCVSYN: 1, }
     """
-    preflags = {}
-    if flags:
-        preflags.update(flags)
-    srtf = _preflight(srt_url,preflags)
+
+        
+    srtf = SRTfu(srt_url)
     srtf.fetch(remote_file, local_file)

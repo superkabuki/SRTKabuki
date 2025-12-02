@@ -37,6 +37,7 @@ ___
 # Docs
 
 * [Install](#install)
+* [Examples](#https://github.com/superkabuki/srtfu/examples/)
 * [Usage](#usage)  
   * [fetch](#fetch) - file transfer
   * [datagramer](#datagramer) - parsing video streams
@@ -174,11 +175,20 @@ ___
 * One note, the socket is an optional arg in methods, it only needs to be used when a server accepts a socket connection. 
 * init SRTfu instance, just provide a srt_url
 * a socket is created for you, but not connected.
-* the srt_url sets host and port to bind for servers (0.0.0.0 works), and host and port to connect for clients 
+* the srt_url sets host and port to bind for servers (0.0.0.0 works), and host and port to connect for clients
+___
+* init SRTfu instance
 ```py3
 from srtfu import SRTfu
 
-srtf = SRTfu(srt_url)
+srt_url =srt://127.0.0.1:9000
+
+srtf=SRTfu(srt_url)
+```
+* srt_url can be where an instance is listening, or the address that an instance wants to connect to, everything is in the same class
+* When an instance is created  socket, self.sock is created.
+* __SRTfu methods will handle all the ctype conversions and pointers__
+
 ```
 * next you can set sock flags
 ```py3
@@ -186,7 +196,31 @@ srtf = SRTfu(srt_url)
 
     srtf.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
     srtf.setsockflag(SRTO_RCVSYN,1)
-    srtf.setsockflag(SRTO_RCVBUF,32768)
+    srtf.setsockflag(SRTO_RCVBUF,3276800)
+
+```
+* You can also pass a dict of socket flags to set when you create a new instance of SRTfu
+```py3
+
+  from srtfu import SRTfu, SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
+
+  flags={SRTO_TRANSTYPE:SRT_LIVE,
+         SRTO_RCVSYN:1,
+         SRTO_RCVBUF: 3276800,}
+
+  srt_url = srt://127.0.0.1:9000
+```
+
+* set congestion control algorithm
+ ```py3
+   srtf.conlive()   # for live
+# OR
+
+  srtf.confile()    # for file
+
+# OR to set any type of congestion control
+
+srtf.congestion_control(the_algo)
 
 ```
 * for clients call connect

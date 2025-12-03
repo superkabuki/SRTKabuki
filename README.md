@@ -26,7 +26,7 @@ ___
 # Docs
 
 * [Install](#install)
-* [Examples](#https://github.com/superkabuki/SRTfu/tree/main/examples)
+* [Examples](https://github.com/superkabuki/SRTfu/tree/main/examples)
 * [Usage](#usage)  
   * [fetch](#fetch) - file transfer
   * [datagramer](#datagramer) - parsing video streams

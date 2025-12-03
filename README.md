@@ -15,10 +15,8 @@ ___
 * 11/28/2025 : __Fixed datagramer__, tested for 8 hours straight parsing SCTE35, __513 cues out of 513 cues parssed correctly__.
 * 11/25/2025 : __Release v0.0.1 is now available via pip__ _(..and the crowd goes wild!)_
 * 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 
-* 11/20/2025 : __SRTfu__ __is working__.
 * 11/19/2025 : cyclomatic complexity __A (1.2790697674418605)__
 * 11/18/2025 : rewrote examples __sendfile.cpp__ and __recvfile.cpp__ with __SRTfu__, both are working.
-* 11/17/2025 : __Of course SRTfu runs on OpenBSD__ 
 * 11/16/2025 : libsrt now builds correctly and  builds the srt apps correctly with clang++ on OpenBSD
 * 11/12/2025 : __Parsing SCTE-35 from SRT__ is now working. 
 

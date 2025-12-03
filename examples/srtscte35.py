@@ -52,23 +52,22 @@ def add_scte35_to_sidecar(scte35):
         sidecar.write(data)
 
 
-def check_for_scte35(packet):
+def check_for_scte35(packet,strm):
     """
-    check_for_scte35 parse a packet for SCTE-35
+    check a packet for scte35 
     """
     scte35 = strm._parse(packet)
-    return scte35
+    if scte35:
+        add_scte35_to_sidecar(scte35)
 
 
 def parse_packet(packet, strm):
     """
     parse_packet check mpegts packet for scte35
     """
-    if has_sync_byte(packet):
-        if at_least_a_packet(packet):
-            scte35 = check_for_scte35(packet)
-            if scte35:
-                add_scte35_to_sidecar(scte35)
+    if at_least_a_packet(packet):
+        if has_sync_byte(packet):
+            check_for_scte35(packet,strm)
 
 
 def packetize(datagram):
@@ -78,20 +77,11 @@ def packetize(datagram):
     return [datagram[i : i + PACKETSIZE] for i in range(0, len(datagram), PACKETSIZE)]
 
 
-def parse_packets(datagram, strm):
-    """
-    parse packets parse datagram packets.
-    """
-    _ = [parse_packet(packet, strm) for packet in packetize(datagram)]
-
-
 def parse_datagram(datagram, strm):
     """
     parse_datagram test datagram and parse.
     """
-    if at_least_a_packet(datagram):
-        if has_sync_byte(datagram):
-            parse_packets(datagram, strm)
+    _ = [parse_packet(packet, strm) for packet in packetize(datagram)]
 
 
 def spinner(lc):

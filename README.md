@@ -26,11 +26,11 @@ ___
 # Docs
 
 * [Install](#install)
-* [Examples](https://github.com/superkabuki/SRTfu/tree/main/examples)
+* [Examples](https://github.com/superkabuki/SRTfu/tree/main/examples) several of the libsrt rewritten with srtfu, and a SCTE35 parsing example.
 * [Usage](#usage)  
   * [fetch](#fetch) - file transfer
   * [datagramer](#datagramer) - parsing video streams
-  * [smoketest](#smoketest) - sthe moketest from libsrt in srtfu.
+  * [smoketest](#smoketest) - the smoketest from libsrt in srtfu.
   * [SCTE35](#scte35) - parse scte35 from srt
   * [low level](#low-level) - using the SRTfu class.
   * [SRTfu](#srtfu) -all the SRTfu methods

@@ -56,6 +56,7 @@ ___
 
 
 # Usage
+#### srtfu handles the ctype conversion and pointers. 
 
 * srtfu is meant be easy to use.
 * use __fetch__ to retrieve files over srt. Use [datagramer](#datagramer) to parse live streams.

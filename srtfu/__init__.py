@@ -114,4 +114,4 @@ SRTO_MAXREXMITBW = 63  # Maximum bandwidth limit for retransmision (Bytes/s)
 # these come after the constants to avoid circular references.
 
 from .srtfu import SRTfu
-from .funcs import datagramer, fetch
+from .funcs import datagramer, packetizer, fetch

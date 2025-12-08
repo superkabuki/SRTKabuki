@@ -17,6 +17,9 @@ from . import SRTO_TRANSTYPE, SRTO_CONGESTION
 
 # Socket Address structures
 
+ZERO=b'\x00'
+SYNC_BYTE=b'G'
+PKTSZ=188
 
 class sockaddr(ctypes.Structure):
     _fields_ = [
@@ -369,6 +372,28 @@ class SRTfu:
         ):
             nval = self.mkmsg(val)
         return nval
+
+    def read(self,numbytes):
+        """
+        read read numbytes of bytes
+        and return them.
+        """
+        buffsize= 1456
+        bigfatbuff =b''
+        newbuff=b''
+        while numbytes:
+            buff = self.mkbuff(1456)
+            self.recv(buff)
+            bigfatbuff += buff.rstrip(ZERO)
+            while SYNC_BYTE in bigfatbuff:
+                bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
+                packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
+                if packet.startswith(SYNC_BYTE):
+                    if len(packet)==PKTSZ:
+                        newbuff +=packet
+            numbytes -=buffsize
+        return newbuff
+        
 
     def recv(self, buffer, sock=None):
         """

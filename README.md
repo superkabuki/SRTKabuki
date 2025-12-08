@@ -9,6 +9,8 @@
 ___
 
 ### NEWS
+* 12/08/2025 :  __Release v0.0.7__ aka _'I got your packet hanging right here!'_
+* 12/07/2025 : the rise of __packetizer__
 * 12/01/2025 : __Release v0.0.5__ aka _'everything is working?'_
 * 11/29/2025 : __Renaming project to SRTfu__, SRTKabuki does not work well with search engines.
 * 11/29/2025 : Released __v0.0.3__

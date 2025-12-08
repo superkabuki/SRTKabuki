@@ -59,10 +59,11 @@ def at_least_a_packet(stuff):
     return len(stuff) >= PKTSZ
 
 
-def verify_packet(packet):
+def verified(packet):
     """
-    verify_packet check length of
-    packet and that it starts with sync byte
+    verified  checks length of
+    packet and that it starts with
+    a sync byte
     """
     if at_least_a_packet(packet):
         return has_sync_byte(packet)
@@ -77,17 +78,14 @@ def packetizer(srt_url,flags=None):
         for packet in packetizer(srt_url):
             ...
     """
-    bigfatbuff=b''
+    bigfatbuff=b'' 
     for datagram in datagramer(srt_url,flags):
-        packets=[]
         bigfatbuff += datagram.rstrip(ZERO)
         while SYNC_BYTE in bigfatbuff:
             bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
             packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
-            if verify_packet(packet):
-                packets.append(packet)
-        for packet in packets:
-            yield packet
+            if verified(packet):
+                yield packet
 
 
 def fetch(srt_url, remote_file,local_file, flags=None):

@@ -25,7 +25,8 @@ ___
 
 * [Install](#install)
 * [Examples](https://github.com/superkabuki/SRTfu/tree/main/examples) several of the libsrt rewritten with srtfu, and a SCTE35 parsing example.
-* [Usage](#usage)  
+* [Usage](#usage)
+  * [packetizer](#packetizer) - mpegts packets from SRT live stream 
   * [fetch](#fetch) - file transfer
   * [datagramer](#datagramer) - parsing video streams
   * [smoketest](#smoketest) - the smoketest from libsrt in srtfu.
@@ -33,7 +34,7 @@ ___
   * [low level](#low-level) - using the SRTfu class.
   * [SRTfu](#srtfu) -all the SRTfu methods
   * [socket flags](#socket-flags) - SRT uses a lot of socket flags.
-  * 
+    
 ___
 
 ### Install 
@@ -57,8 +58,24 @@ ___
 #### srtfu handles the ctype conversion and pointers. 
 
 * srtfu is meant be easy to use.
-* use __fetch__ to retrieve files over srt. Use [datagramer](#datagramer) to parse live streams.
+* use __packetizer__ to receive SRT stream as mpegts packets 
+* use [__fetch__](#fetch) to retrieve files over srt. Use [__datagramer__](#datagramer) to parse live streams.
 * All other functionality is built into the __srtfu.SRTfu__ class
+---
+# packetizer
+If you've been wondering how to get 188 byte mpegts packets from SRT payloads, use packetizer.
+packetizer is a generator that receives a live SRT stream and returns converted and reassembled mpegts packets.
+```py3
+from srtfu import packetizer
+
+srt_url = 'srt://192.168.5.45:9000'
+
+for packet in packetizer(srt_url):
+ print(packet)
+...
+```
+* it's that easy.
+---
 
 # fetch
 If you just want to retrieve files over SRT, use the fetch function. 
@@ -103,6 +120,7 @@ for datagram in datagramer(srt_url):
 * if you want to see a more complete example, [srtscte35.py](https://github.com/superkabuki/SRTfu/blob/main/examples/srtscte35.py)
 
 ___
+
 
 # smoketest
 ### The smoketest from the libsrt docs.
@@ -149,11 +167,10 @@ ___
   ```py3
   python3 -mpip install threefive --break-system-packages
   ```
-* datagramer is great when you need to add srt support to a parser like threefive.
-
-* threefive doesn't directly support srt, so datagramer reads the srt stream and passes data to threefive.
-
-* Run [srtscte35.py](examples/srtscte35.py)  in examples directory.
+* run threefive
+```py3
+threefive srt://1.2.3.4:4201
+```
 ___
 
 
@@ -215,6 +232,17 @@ srtf.congestion_control(the_algo)
 ```py3
 srtf.connect()
 ```
+
+* SRTfu  also has a __read__ method
+```py3
+from srtfu import SRTfu
+
+srt_url= 'srt://1.2.3.4:5678'
+srtf=SRTfu(srt_url)
+srtf.connect()
+data = srtf.read(10000)
+
+```
 *  for servers call bind and listen
 ```py3
   srtf.bind()
@@ -242,13 +270,6 @@ message = 'message can be strings, bytes, or ints'
 new_message= srtf.mkmsg(message)
 ```
 
-* to receive from a client
-* Note the socket is always the last arg
-
-```py3
- smallbuff = srtf.mkbuff(1456)
- srtf.recv(smallbuff, fhandle)
-```
 
 ## SRTfu
 
@@ -307,7 +328,7 @@ class SRTfu(builtins.object)
  |  
  |  fetch(self, remote_file, local_file)
  |      fetch fetch remote_file fron host on port
- |      and save it as local_file
+|      and save it as local_file
  |  
  |  getlasterror(self)
  |      getlasterror srt_getlasterror_str
@@ -333,13 +354,17 @@ class SRTfu(builtins.object)
  |  mkbuff(self, buffsize, data=b'')
  |      mkbuff make a c  buffer
  |      to read into when receiving data.
- |  
+|  
  |  mkmsg(self, msg)
  |      mkmsg convert python byte string
  |      to a C string buffer when sending data
  |  
  |  new_val(self, val)
  |      new_val convert val into a ctypes type
+ |  
+ |  read(self, numbytes)
+ |      read read numbytes of bytes
+ |      and return them.
  |  
  |  recv(self, buffer, sock=None)
  |      recv srt_recv
@@ -349,13 +374,14 @@ class SRTfu(builtins.object)
  |  
  |  recvmsg(self, buffer, sock=None)
  |      recvmsg srt_recvmsg
- |   
+ |  
  |  remote_file_size(self)
+ |      remote_file_size read remote file size.
  |  
  |  request_file(self, remote_file)
  |      request_file request a file from a server
  |  
- |  send(self, msg, sock=None)
+|  send(self, msg, sock=None)
  |      send srt_send
  |  
  |  sendfile(self, filename, sock=None)
@@ -382,6 +408,7 @@ class SRTfu(builtins.object)
  |  
  |  split_url(url)
  |      split_url, split srt url into addr,port, path and args
+ |  
  |  ----------------------------------------------------------------------
 
 ```

@@ -354,6 +354,7 @@ class SRTfu:
             msg = b"Message needs to be bytes"
         return self.mkbuff(len(msg), msg)
 
+
     def new_val(self, val):
         """
         new_val convert val into a ctypes type
@@ -381,20 +382,19 @@ class SRTfu:
         buffsize= 1456
         bigfatbuff =b''
         newbuff=b''
-        while numbytes:
-            buff = self.mkbuff(1456)
+        while numbytes > 0:
+            buff = self.mkbuff(buffsize)
             self.recv(buff)
-            bigfatbuff += buff.rstrip(ZERO)
+            numbytes -=buffsize
+            bigfatbuff += buff.raw.rstrip(ZERO)
             while SYNC_BYTE in bigfatbuff:
                 bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
                 packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
                 if packet.startswith(SYNC_BYTE):
                     if len(packet)==PKTSZ:
                         newbuff +=packet
-            numbytes -=buffsize
         return newbuff
         
-
     def recv(self, buffer, sock=None):
         """
         recv srt_recv
@@ -473,7 +473,6 @@ class SRTfu:
     def setsockflag(self, flag, val):
         """
         setsockflag  srt_setsockflag
-
         """
         nval = self.new_val(val)
         st = self.libsrt.srt_setsockflag(
@@ -503,6 +502,9 @@ class SRTfu:
     # helper methods not in libsrt
 
     def remote_file_size(self):
+        """
+        remote_file_size read remote file size.
+        """
         buffer_size = 20
         buffer = self.mkbuff(buffer_size)
         self.recv(buffer)

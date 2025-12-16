@@ -1,7 +1,8 @@
 #!/bin/sh
 
 OPENSSL=`which openssl`
-CMAKE=`which cmake
+CMAKE=`which cmake`
+GIT=`which git`
 OS=`uname
 MAKE=make
 
@@ -13,6 +14,11 @@ fi
 
 if [ -z "$CMAKE" ]; then
 	printf "\ncmake is required to build libsrt\n" 
+	exit -1
+fi
+
+if [ -z "$GIT" ]; then
+	printf "\ngit is required to build libsrt\n" 
 	exit -1
 fi
 

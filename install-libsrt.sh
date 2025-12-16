@@ -1,8 +1,15 @@
 #!/bin/sh
 
+OPENSSL=`which openssl`
+CMAKE=`which cmake
+OS=`uname
 MAKE=make
-OS=`uname`
-CMAKE=`which cmake`
+
+
+if [ -z "$OPENSSL" ]; then
+	printf "\nopenssl is required to build libsrt\n" 
+	exit -1
+fi
 
 if [ -z "$CMAKE" ]; then
 	printf "\ncmake is required to build libsrt\n" 
@@ -10,8 +17,7 @@ if [ -z "$CMAKE" ]; then
 fi
 
 if [ "$OS" == "OpenBSD" ]; then
- MAKE=gmake
-
+ 	MAKE=gmake
 fi
 
 

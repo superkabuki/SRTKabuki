@@ -3,7 +3,6 @@ libsrtinstall.py
 '''
 
 
-
 import os
 import sys
 from subprocess import Popen, PIPE
@@ -77,10 +76,9 @@ def libsrtinstall():
     os.chdir("srt")
     print(os.getcwd())
     
-    do(["cmake", "build", ".", "--install-prefix",f'{os.getcwd()}/../srtfu'])
+    do(["cmake", "build", "."])
     make = pickmake()
-    do([make, "install"])
-
-
-#libsrtinstall()
-# path=f'{os.path.dirname(__file__)}/libsrt.so'
+    do([make, "all"])
+    do(['cp','libsrt.so.1.5.5' ,f'{os.path.dirname(__file__)}'])
+    do(['cp','libsrt.so.1.5' ,f'{os.path.dirname(__file__)}'])
+    do(['cp','libsrt.so' ,f'{os.path.dirname(__file__)}'])

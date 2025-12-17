@@ -75,9 +75,12 @@ def libsrtinstall():
     runchks()
     do(["git", "clone", "https://github.com/Haivision/srt"])
     os.chdir("srt")
-    do(["cmake", "build", "."])
+    print(os.getcwd())
+    
+    do(["cmake", "build", ".", "--install-prefix",f'{os.getcwd()}/../srtfu'])
     make = pickmake()
-    do([make, "all"])
+    do([make, "install"])
 
 
-# srtinstall()
+#libsrtinstall()
+# path=f'{os.path.dirname(__file__)}/libsrt.so'

@@ -9,6 +9,12 @@
 ___
 
 ### NEWS
+* 12/16/2025 : __New python libsrt installer__ you can build and install libsrt in the python3 shell
+```py3
+ from srtfu.libsrtinstall import libsrtinstall
+
+ libsrtinstall()
+```
 * 12/12/2025 : __I am back peddling on my decision to unroll the enums from srt.h__. I think the enums are the better way, __enums will be back in the next release__ instead of all the individual constants.
 * 12/11/2025 : __Working on throttling__ so SRTfu can intake at any speed and output in realtime, __like ffmpeg`s '-re'__.
 * 12/10/2025 : [threefive, __God`s favorite SCTE35 parser__](https://github.com/superkabuki/SCTE35), now uses __SRTfu__ to handle SRT. 
@@ -17,13 +23,6 @@ ___
 * 12/01/2025 : __Release v0.0.5__ aka _'everything is working?'_
 * 11/29/2025 : __Renaming project to SRTfu__, SRTKabuki does not work well with search engines.
 * 11/29/2025 : Released __v0.0.3__
-* 11/28/2025 : __Fixed datagramer__, tested for 8 hours straight parsing SCTE35, __513 cues out of 513 cues parssed correctly__.
-* 11/25/2025 : __Release v0.0.1 is now available via pip__ _(..and the crowd goes wild!)_
-* 11/25/2025 : added __datagramer__, pythonic fast __datagam generator__ live srt stream parsing. 
-* 11/19/2025 : cyclomatic complexity __A (1.2790697674418605)__
-* 11/18/2025 : rewrote examples __sendfile.cpp__ and __recvfile.cpp__ with __SRTfu__, both are working.
-* 11/16/2025 : libsrt now builds correctly and  builds the srt apps correctly with clang++ on OpenBSD
-* 11/12/2025 : __Parsing SCTE-35 from SRT__ is now working. 
 
 
 # Docs

@@ -17,9 +17,10 @@ from . import SRTO_TRANSTYPE, SRTO_CONGESTION
 
 # Socket Address structures
 
-ZERO=b'\x00'
-SYNC_BYTE=b'G'
-PKTSZ=188
+ZERO = b"\x00"
+SYNC_BYTE = b"G"
+PKTSZ = 188
+
 
 class sockaddr(ctypes.Structure):
     _fields_ = [
@@ -156,7 +157,11 @@ class SRTfu:
         load_srt load everything from libsrt.so
         """
         libsrt = None
-        libsrt = ctypes.CDLL("libsrt.so")
+        path=f'{os.path.dirname(__file__)}/libsrt.so'
+        try:
+            libsrt = ctypes.CDLL(path)
+        except:
+            libsrt=ctypes.CDLL(ctypes.util.find_library("libsrt.so"))
         if not libsrt:
             raise OSError("failed to load libsrt.so")
         return libsrt
@@ -354,7 +359,6 @@ class SRTfu:
             msg = b"Message needs to be bytes"
         return self.mkbuff(len(msg), msg)
 
-
     def new_val(self, val):
         """
         new_val convert val into a ctypes type
@@ -374,27 +378,27 @@ class SRTfu:
             nval = self.mkmsg(val)
         return nval
 
-    def read(self,numbytes):
+    def read(self, numbytes):
         """
         read read numbytes of bytes
         and return them.
         """
-        buffsize= 1456
-        bigfatbuff =b''
-        newbuff=b''
+        buffsize = 1456
+        bigfatbuff = b""
+        newbuff = b""
         while numbytes > 0:
             buff = self.mkbuff(buffsize)
             self.recv(buff)
-            numbytes -=buffsize
+            numbytes -= buffsize
             bigfatbuff += buff.raw.rstrip(ZERO)
             while SYNC_BYTE in bigfatbuff:
                 bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
                 packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
                 if packet.startswith(SYNC_BYTE):
-                    if len(packet)==PKTSZ:
-                        newbuff +=packet
+                    if len(packet) == PKTSZ:
+                        newbuff += packet
         return newbuff
-        
+
     def recv(self, buffer, sock=None):
         """
         recv srt_recv

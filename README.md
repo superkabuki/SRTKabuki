@@ -9,13 +9,7 @@
 ___
 
 ### NEWS
-* 12/17/2025 : __libsrt is now automatically built for srtfu__ This is pretty slick. __Available in v0.0.9__ 
-* 12/16/2025 : __New python libsrt installer__ you can build and install libsrt in the python3 shell
-```py3
- from srtfu.libsrtinstall import libsrtinstall
-
- libsrtinstall()
-```
+* 12/17/2025 : __libsrt is now automatically built for SRTfu__ This is pretty slick. __Available in v0.0.9__ 
 * 12/12/2025 : __I am back peddling on my decision to unroll the enums from srt.h__. I think the enums are the better way, __enums will be back in the next release__ instead of all the individual constants.
 * 12/11/2025 : __Working on throttling__ so SRTfu can intake at any speed and output in realtime, __like ffmpeg`s '-re'__.
 * 12/10/2025 : [threefive, __God`s favorite SCTE35 parser__](https://github.com/superkabuki/SCTE35), now uses __SRTfu__ to handle SRT. 

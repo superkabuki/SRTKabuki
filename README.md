@@ -208,6 +208,7 @@ srtf=SRTfu(srt_url)
          SRTO_RCVBUF: 3276800,}
 
   srt_url = srt://127.0.0.1:9000
+  srtf=SRTfu(srt_url,flags=flags)
 ```
 
 * set congestion control algorithm

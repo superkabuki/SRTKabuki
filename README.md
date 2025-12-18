@@ -9,6 +9,7 @@
 ___
 
 ### NEWS
+* 12/17/2025 : __libsrt is now automatically built for srtfu__ This is pretty slick. __Available in v0.0.9__ 
 * 12/16/2025 : __New python libsrt installer__ you can build and install libsrt in the python3 shell
 ```py3
  from srtfu.libsrtinstall import libsrtinstall

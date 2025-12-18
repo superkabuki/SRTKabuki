@@ -1,5 +1,5 @@
 '''
-libsrtinstall.py 
+libsrtinstall.py
 '''
 
 
@@ -25,7 +25,7 @@ def runcmd(cmd):
     """
     runcmd Popen a command
     """
-    return Popen(cmd, stderr=PIPE, stdout=PIPE).communicate()
+    return Popen(cmd,stderr=PIPE, stdout=PIPE).communicate()
 
 
 def do(cmd):
@@ -33,9 +33,7 @@ def do(cmd):
     do run command and print output
     """
     out, errs = runcmd(cmd)
-    print("OUT")
     splitprint(out)
-    print("ERRS")
     splitprint(errs)
 
 
@@ -61,7 +59,7 @@ def runchks():
         prog = chks.pop()
         out, errs = runcmd(["which", prog])
         if out:
-            print(f"{prog} found")
+            print(f"{prog}\tfound")
         else:
             print(f"{prog} is required for libsrt")
             sys.exit()
@@ -74,11 +72,9 @@ def libsrtinstall():
     runchks()
     do(["git", "clone", "https://github.com/Haivision/srt"])
     os.chdir("srt")
-    print(os.getcwd())
-    
     do(["cmake", "build", "."])
     make = pickmake()
     do([make, "all"])
-    do(['cp','libsrt.so.1.5.5' ,f'{os.path.dirname(__file__)}'])
-    do(['cp','libsrt.so.1.5' ,f'{os.path.dirname(__file__)}'])
-    do(['cp','libsrt.so' ,f'{os.path.dirname(__file__)}'])
+    _=[do(['cp',so,f'{os.path.dirname(__file__)}']) for so in os.listdir('.') if so.startswith('libsrt.so')]
+    os.chdir('../')
+    do(['rm','-rf','srt'])

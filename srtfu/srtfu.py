@@ -160,10 +160,13 @@ class SRTfu:
         path=f'{os.path.dirname(__file__)}/libsrt.so'
         try:
             libsrt = ctypes.CDLL(path)
+            print(libsrt)
         except:
-            libsrt=ctypes.CDLL(ctypes.util.find_library("libsrt.so"))
-        if not libsrt:
-            raise OSError("failed to load libsrt.so")
+            # raise OSError("failed to load libsrt.so")
+            print('... building libsrt real quick')
+            from .libsrtinstall import libsrtinstall
+            libsrtinstall()
+            libsrt = ctypes.CDLL(path)
         return libsrt
 
     def accept(self):

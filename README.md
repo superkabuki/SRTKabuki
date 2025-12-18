@@ -38,12 +38,8 @@ ___
 
 ### Install 
 ##### Install libsrt
-
-* __if you have libsrt already installed, you can skip this step__
-
-* Check if your os has a libsrt package and install it. SRTfu is built with libsrt v1.5.5.
-
-* or run the the __install-libsrt.sh__ script in this repo.
+* libsrt will be built and installed automatically into the SRTfu site-packages directory.
+* the libsrt in the SRTfu directory will only be used by SRTfu. 
 
 ### Install SRTfu
 ```sh
@@ -57,8 +53,9 @@ ___
 #### srtfu handles the ctype conversion and pointers. 
 
 * srtfu is meant be easy to use.
-* use __packetizer__ to receive SRT stream as mpegts packets 
-* use [__fetch__](#fetch) to retrieve files over srt. Use [__datagramer__](#datagramer) to parse live streams.
+* use __packetizer__ to receive SRT stream as mpegts packets.
+* Use [__datagramer__](#datagramer) to receive SRT stream if you aren't parsing the raw video.
+* use [__fetch__](#fetch) to retrieve files over srt. 
 * All other functionality is built into the __srtfu.SRTfu__ class
 ---
 # packetizer
@@ -76,28 +73,8 @@ for packet in packetizer(srt_url):
 * it's that easy.
 ---
 
-# fetch
-If you just want to retrieve files over SRT, use the fetch function. 
-
-```py3
- fetch(srt_url , remote_file, local_file, flags=None)
-```
-
-* Complete working example
-
-```py3
-from srtfu import fetch
-
-srt_url = srt://206.170.125.43:9000
-remote_file = /home/a/video.ts
-local_file = video.ts
-
-fetch(srt_url , remote_file, local_file)
-```
-___
-
 # datagramer
-Use the __datagramer__ function to parse an srt stream.
+Use the __datagramer__ function to receive a live srt stream.
 
 ```py3
 datagramer(srt_url,flags=None)
@@ -116,10 +93,28 @@ srt_url = srt://10.0.0.1:9000
 for datagram in datagramer(srt_url):
     sys.stdout.buffer.write(datagram)
 ```
-* if you want to see a more complete example, [srtscte35.py](https://github.com/superkabuki/SRTfu/blob/main/examples/srtscte35.py)
 
 ___
+# fetc
+h
+If you just want to retrieve files over SRT, use the fetch function. 
 
+```py3
+ fetch(srt_url , remote_file, local_file, flags=None)
+```
+
+* Complete working example
+
+```py3
+from srtfu import fetch
+
+srt_url = srt://206.170.125.43:9000
+remote_file = /home/a/video.ts
+local_file = video.ts
+
+fetch(srt_url , remote_file, local_file)
+```
+___
 
 # smoketest
 ### The smoketest from the libsrt docs.

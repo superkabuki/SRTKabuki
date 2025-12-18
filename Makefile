@@ -9,14 +9,14 @@ clean:
 	rm -rf build/*
 
 pypy3: clean
-	$(PYPY3) setup.py sdist bdist_wheel
-	$(PYPY3) setup.py install --user	
+	$(PYPY3) -m build
+	$(PYPY3) -m pip install .	
 
 install: clean pkg
-	$(PY3)  setup.py install --user
+	$(PY3) -m pip install .
 
 pkg: clean
-	$(PY3) setup.py sdist bdist_wheel
+	$(PY3) -m build
 
 uninstall: clean
 	$(PIP3) uninstall srtfu

@@ -97,8 +97,8 @@ for datagram in datagramer(srt_url):
 ```
 
 ___
-# fetc
-h
+# fetch
+
 If you just want to retrieve files over SRT, use the fetch function. 
 
 ```py3

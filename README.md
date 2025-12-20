@@ -175,27 +175,14 @@ ___
 * a socket is created for you, but not connected.
 * the srt_url sets host and port to bind for servers (0.0.0.0 works), and host and port to connect for clients
 ___
-* init SRTfu instance
+### init SRTfu instance
+
 ```py3
 from srtfu import SRTfu
 
 srt_url =srt://127.0.0.1:9000
 
 srtf=SRTfu(srt_url)
-```
-* srt_url can be where an instance is listening, or the address that an instance wants to connect to, everything is in the same class
-* When an instance is created  socket, self.sock is created.
-* __SRTfu methods will handle all the ctype conversions and pointers__
-
-```
-* next you can set sock flags
-```py3
-    from srtfu import SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
-
-    srtf.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
-    srtf.setsockflag(SRTO_RCVSYN,1)
-    srtf.setsockflag(SRTO_RCVBUF,3276800)
-
 ```
 * You can also pass a dict of socket flags to set when you create a new instance of SRTfu
 ```py3
@@ -210,6 +197,22 @@ srtf=SRTfu(srt_url)
   srtf=SRTfu(srt_url,flags=flags)
 ```
 
+* srt_url can be where an instance is listening, or the address that an instance wants to connect to, everything is in the same class
+* When an instance is created  socket, self.sock is created.
+* __SRTfu methods will handle all the ctype conversions and pointers__
+
+### set sock flags
+* next you can set sock flags
+```py3
+    from srtfu import SRTO_TRANSTYPE,SRT_LIVE,SRTO_RCVSYN,SRTO_RCVBUF
+
+    srtf.setsockflag(SRTO_TRANSTYPE,SRT_LIVE)
+    srtf.setsockflag(SRTO_RCVSYN,1)
+    srtf.setsockflag(SRTO_RCVBUF,3276800)
+
+```
+### congestion control
+
 * set congestion control algorithm
  ```py3
    srtf.conlive()   # for live
@@ -222,11 +225,12 @@ srtf=SRTfu(srt_url)
 srtf.congestion_control(the_algo)
 
 ```
+### connect
 * for clients call connect
 ```py3
 srtf.connect()
 ```
-
+### read
 * SRTfu  also has a __read__ method
 ```py3
 from srtfu import SRTfu
@@ -237,6 +241,7 @@ srtf.connect()
 data = srtf.read(10000)
 
 ```
+### bind and listen
 *  for servers call bind and listen
 ```py3
   srtf.bind()
@@ -246,17 +251,22 @@ data = srtf.read(10000)
 ```py3
     fhandle = srtf.accept() 
 ```
+### recv
 * to receive from a client
 * Note the socket is always the last arg
 ```py3
  smallbuff = srtf.mkbuff(1500)
  srtf.recv(smallbuff, fhandle)
 ```
+### mkbuff
+
 * If you need a buffer to receive into
 
 ```py3
   smallbuff = srtf.mkbuff(1500)
 ```
+### mkmesg
+
 * if you need to send data in a buffer
 
 ```py3

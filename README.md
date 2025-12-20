@@ -9,16 +9,13 @@
 ___
 
 ### NEWS
-* 12/19.2025 : __fixed__ packet loss in __packetizer__ and __SRTfu.read()__
-* 12/17/2025 : __libsrt is now automatically built for SRTfu__ This is pretty slick. __Available in v0.0.9__ 
-* 12/12/2025 : __I am back peddling on my decision to unroll the enums from srt.h__. I think the enums are the better way, __enums will be back in the next release__ instead of all the individual constants.
-* 12/11/2025 : __Working on throttling__ so SRTfu can intake at any speed and output in realtime, __like ffmpeg`s '-re'__.
-* 12/10/2025 : [threefive, __God`s favorite SCTE35 parser__](https://github.com/superkabuki/SCTE35), now uses __SRTfu__ to handle SRT. 
-* 12/08/2025 :  __Release v0.0.7__ aka _'I got your packet hanging right here!'_
-* 12/07/2025 : the rise of __packetizer__
-* 12/01/2025 : __Release v0.0.5__ aka _'everything is working?'_
-* 11/29/2025 : __Renaming project to SRTfu__, SRTKabuki does not work well with search engines.
-* 11/29/2025 : Released __v0.0.3__
+* 12/19/2025 : __v0.0.9__ aka '_global domination and stuff_' __released__
+   * `New` __auto installer__ for __libsrt shared lib__. It`s kind of cool 
+   * `Fixed` packet loss in __SRTfu.read()__ method
+   * `Fixed` packet loss in __packetizer__ function
+   * `Added` __SRTSockOpt__ enum
+   * `Switched` from setuptools to build module  for sdist and wheel generation.
+
 
 
 # Docs

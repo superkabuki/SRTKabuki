@@ -9,6 +9,7 @@
 ___
 
 ### NEWS
+* 12/19.2025 : __fixed__ packet loss in __packetizer__ and __SRTfu.read()__
 * 12/17/2025 : __libsrt is now automatically built for SRTfu__ This is pretty slick. __Available in v0.0.9__ 
 * 12/12/2025 : __I am back peddling on my decision to unroll the enums from srt.h__. I think the enums are the better way, __enums will be back in the next release__ instead of all the individual constants.
 * 12/11/2025 : __Working on throttling__ so SRTfu can intake at any speed and output in realtime, __like ffmpeg`s '-re'__.
@@ -38,7 +39,8 @@ ___
 
 ### Install 
 ##### Install libsrt
-* libsrt will be built and installed automatically into the SRTfu site-packages directory.
+* __Requires clang or gcc, cmake, git,gmake or make, and openssl__
+* The first time you use SRTfu libsrt will be built and installed automatically into the SRTfu site-packages directory.
 * the libsrt in the SRTfu directory will only be used by SRTfu. 
 
 ### Install SRTfu

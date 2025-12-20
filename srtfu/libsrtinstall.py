@@ -62,9 +62,9 @@ def check_program(prog):
         sys.exit()
 
 
-def runchks():
+def check_depends():
     """
-    runchks check for deps
+    check_depends check for deps
     needed to build libsrt
     """
     depends = ["git", "openssl", "cmake"]
@@ -104,7 +104,7 @@ def libsrtinstall():
     """
     libsrtinstall install libsrt
     """
-    runchks()
+    check_depends()
     do(["git", "clone", "https://github.com/Haivision/srt"])
     os.chdir("srt")
     makes()

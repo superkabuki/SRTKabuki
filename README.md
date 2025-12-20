@@ -250,13 +250,13 @@ data = srtf.read(10000)
 * to receive from a client
 * Note the socket is always the last arg
 ```py3
- smallbuff = srtf.mkbuff(1456)
+ smallbuff = srtf.mkbuff(1500)
  srtf.recv(smallbuff, fhandle)
 ```
 * If you need a buffer to receive into
 
 ```py3
-  smallbuff = srtf.mkbuff(1456)
+  smallbuff = srtf.mkbuff(1500)
 ```
 * if you need to send data in a buffer
 

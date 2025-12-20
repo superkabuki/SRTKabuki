@@ -17,7 +17,6 @@ from . import SRTO_TRANSTYPE, SRTO_CONGESTION
 
 # Socket Address structures
 
-ZERO = b"\x00"
 SYNC_BYTE = b"G"
 PKTSZ = 188
 
@@ -160,12 +159,12 @@ class SRTfu:
         path=f'{os.path.dirname(__file__)}/libsrt.so'
         try:
             libsrt = ctypes.CDLL(path)
-            print(libsrt)
         except:
             # raise OSError("failed to load libsrt.so")
-            print('... building libsrt real quick')
+            print('... building libsrt real quick', file=sys.stderr)
             from .libsrtinstall import libsrtinstall
             libsrtinstall()
+            path=f'{os.path.dirname(__file__)}/libsrt.so'
             libsrt = ctypes.CDLL(path)
         return libsrt
 
@@ -386,20 +385,19 @@ class SRTfu:
         read read numbytes of bytes
         and return them.
         """
-        buffsize = 1456
+        buffsize = 1500
         bigfatbuff = b""
         newbuff = b""
         while numbytes > 0:
             buff = self.mkbuff(buffsize)
             self.recv(buff)
             numbytes -= buffsize
-            bigfatbuff += buff.raw.rstrip(ZERO)
+            bigfatbuff += buff.raw
             while SYNC_BYTE in bigfatbuff:
                 bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
                 packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
                 if packet.startswith(SYNC_BYTE):
-                    if len(packet) == PKTSZ:
-                        newbuff += packet
+                    newbuff += packet
         return newbuff
 
     def recv(self, buffer, sock=None):
@@ -416,7 +414,7 @@ class SRTfu:
         """
         sock = self.chk_sock(sock)
         remote_size = self.remote_file_size()
-        print("remote size recv", remote_size)
+        print("remote size recv", remote_size, file=sys.stderr)
         offset_val = 0
         recvsize = self.libsrt.srt_recvfile(
             sock,
@@ -426,7 +424,7 @@ class SRTfu:
             SRT_DEFAULT_RECVFILE_BLOCK,
         )
         self.getlasterror()
-        print("recvsize", recvsize)
+        print("recvsize", recvsize, file=sys.stderr)
         return recvsize
 
     def recvmsg(self, buffer, sock=None):
@@ -449,10 +447,10 @@ class SRTfu:
         """
         sendfile srt_sendfile
         """
-        print(filename)
+        print(filename, file=sys.stderr)
         sock = self.chk_sock(sock)
         filesize = os.path.getsize(filename)
-        print("sendfile size ", filesize)
+        print("sendfile size ", filesize, file=sys.stderr)
         msg = str(filesize).encode("utf8")
         msgbuff = self.mkmsg(msg)
         self.send(msgbuff, sock)
@@ -515,12 +513,12 @@ class SRTfu:
         buffer_size = 20
         buffer = self.mkbuff(buffer_size)
         self.recv(buffer)
-        print("buffer.value ", buffer.value)
+        print("buffer.value ", buffer.value, file=sys.stderr)
         try:
             file_size = int(buffer.value.decode())
         except:
             file_size = 0
-        print("remote file size", file_size)
+        print("remote file size", file_size, file=sys.stderr)
         self.getlasterror()
         return file_size
 
@@ -535,7 +533,7 @@ class SRTfu:
                 len(remote_filename),
             ]
         )  # remote file length
-        print("rfl", rfl)
+        print("rfl", rfl, file=sys.stderr)
         rflen = self.mkmsg(rfl)
         self.send(rflen, self.sock)
         self.getlasterror()

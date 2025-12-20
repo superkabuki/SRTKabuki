@@ -1,5 +1,5 @@
 MAJOR = 0
 MINOR = 0
-MINI =  7
+MINI =  9
 
 version = f"{MAJOR}.{MINOR}.{MINI}"

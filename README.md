@@ -34,7 +34,7 @@ ___
     
 ___
 
-### Install 
+# Install 
 ##### Install libsrt
 * __Requires clang or gcc, cmake, git,gmake or make, and openssl__
 * The first time you use SRTfu libsrt will be built and installed automatically into the SRTfu site-packages directory.

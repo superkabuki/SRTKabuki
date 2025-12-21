@@ -9,6 +9,8 @@
 ___
 
 ### NEWS
+* 12/20/2025 : __v0.0.11__ aka '_super star_ __released__.
+    * Minor tuning, but worth it. 
 * 12/19/2025 : __v0.0.9__ aka '_global domination and stuff_' __released__
    * `New` __auto installer__ for __libsrt shared lib__. It`s kind of cool 
    * `Fixed` packet loss in __SRTfu.read()__ method

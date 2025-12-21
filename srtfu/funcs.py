@@ -14,7 +14,6 @@ from . import SRTO_TRANSTYPE, SRTO_RCVSYN, SRTO_RCVBUF, SRT_LIVE
 BUFFSIZE = 1500
 PKTSZ = 188
 SYNC_BYTE = b"G"
-ZERO = b"\x00"
 
 
 def _preflight(srt_url, flags=None):
@@ -45,7 +44,7 @@ def datagramer(srt_url, flags=None):
     while True:
         buffer = srtf.mkbuff(BUFFSIZE)
         st = srtf.recv(buffer)
-        datagram = buffer.raw#.rstrip(ZERO)
+        datagram = buffer.raw
         yield datagram
 
 
@@ -66,19 +65,18 @@ def at_least_a_packet(stuff):
 def packetizer(srt_url, flags=None):
     """
     packetizer  mpegts packet generator
-
     ex.
         for packet in packetizer(srt_url):
-            ...
     """
     bigfatbuff = b""
     for datagram in datagramer(srt_url, flags):
         bigfatbuff += datagram
         while SYNC_BYTE in bigfatbuff:
             bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
-            packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
-            if has_sync_byte(packet):
-                yield packet
+            packet= bigfatbuff[:PKTSZ]
+            bigfatbuff=bigfatbuff[PKTSZ:]
+            yield packet
+
 
 
 def fetch(srt_url, remote_file, local_file, flags=None):

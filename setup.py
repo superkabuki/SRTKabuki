@@ -13,7 +13,7 @@ setuptools.setup(
     version=version,
     author="Adrian of Doom ",
     author_email="spam@bad.show",
-    description="Secure Reliable Transport in Python",
+    description="Secure Reliable Transport",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/superkabuki/SRTfu",

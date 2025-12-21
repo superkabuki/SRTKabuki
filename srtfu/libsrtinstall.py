@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE
 
 WHITEY='\033[0;97m'
 
+
 def splitprint(data):
     """
     splitprint split data
@@ -111,7 +112,6 @@ def libsrtinstall():
     libsrtinstall install libsrt
     """
     print(f'{WHITEY}\nsrtfu - Building shared lib for libsrt\n', file=sys.stderr)
-
     check_depends()
     do(["git", "clone", "https://github.com/Haivision/srt"])
     os.chdir("srt")

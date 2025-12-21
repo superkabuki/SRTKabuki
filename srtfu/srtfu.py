@@ -160,8 +160,6 @@ class SRTfu:
         try:
             libsrt = ctypes.CDLL(path)
         except:
-            # raise OSError("failed to load libsrt.so")
-            print('... building libsrt real quick', file=sys.stderr)
             from .libsrtinstall import libsrtinstall
             libsrtinstall()
             path=f'{os.path.dirname(__file__)}/libsrt.so'
@@ -282,7 +280,7 @@ class SRTfu:
         """
         self.libsrt.srt_getlasterror_str.restype = ctypes.c_char_p
         caller = inspect.currentframe().f_back.f_code.co_name
-        out = f"{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace(
+        out = f"\033[0;97m{caller}: {self.libsrt.srt_getlasterror_str().decode()}".replace(
             "Success", "✓"
         )
         print(out, file=sys.stderr)
@@ -395,9 +393,9 @@ class SRTfu:
             bigfatbuff += buff.raw
             while SYNC_BYTE in bigfatbuff:
                 bigfatbuff = bigfatbuff[bigfatbuff.index(SYNC_BYTE) :]
-                packet, bigfatbuff = bigfatbuff[:PKTSZ], bigfatbuff[PKTSZ:]
-                if packet.startswith(SYNC_BYTE):
-                    newbuff += packet
+                packet= bigfatbuff[:PKTSZ]
+                bigfatbuff=bigfatbuff[PKTSZ:]
+                newbuff += packet
         return newbuff
 
     def recv(self, buffer, sock=None):
@@ -495,7 +493,7 @@ class SRTfu:
         """
         for k, v in flags.items():
             self.setsockflag(k, v)
-            self.getlasterror()
+        self.getlasterror()
 
     def startup(self):
         """

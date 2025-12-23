@@ -18,8 +18,6 @@ ___
    * `Added` __SRTSockOpt__ enum
    * `Switched` from setuptools to build module  for sdist and wheel generation.
 
-
-
 # Docs
 
 * [Install](#install)
@@ -39,8 +37,10 @@ ___
 # Install 
 ##### Install libsrt
 * __Requires clang or gcc, cmake, git,gmake or make, and openssl__
-* The first time you use SRTfu libsrt will be built and installed automatically into the SRTfu site-packages directory.
-* the libsrt in the SRTfu directory will only be used by SRTfu. 
+* __The first time you use SRTfu libsrt will be built and installed automatically into the SRTfu site-packages directory__.
+   * the libsrt in the SRTfu directory will only be used by SRTfu.
+   * Eliminates versioning issues and having to set LD_LIBRARY_PATH.
+   * __Tested and Working on OpenBSD and Debian Sid__. Should work on most UNIX / Linux.
 
 ### Install SRTfu
 ```sh
